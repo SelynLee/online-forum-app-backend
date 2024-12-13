@@ -1,0 +1,171 @@
+services:
+    eureka-server:
+        build:
+            context: ./eureka-server
+        ports:
+            - "8761:8761"
+        networks:
+            - app-network
+
+    api-gateway:
+        build:
+            context: ./api-gateway
+        ports:
+            - "8080:8080"
+        # depends_on:
+        #     - eureka-server
+        # environment:
+        #     - EUREKA_SERVER_URI=http://eureka-server:8761/eureka
+        networks:
+            - app-network
+
+    users-service:
+        build:
+            context: ./users-service
+        ports:
+            - "8081:8081"
+        # depends_on:
+        #     - mysql-users
+        #     - eureka-server
+        # environment:
+        #     - DB_HOST=mysql-users
+        #     - DB_PORT=3306
+        #     - DB_USER=root
+        #     - DB_PASSWORD=root
+        #     - EUREKA_SERVER_URI=http://eureka-server:8761/eureka
+        networks:
+            - app-network
+
+    posts-service:
+        build:
+            context: ./posts-service
+        ports:
+            - "8082:8082"
+        # depends_on:
+        #     - mongo
+        #     - eureka-server
+        # environment:
+        #     - MONGO_URI=mongodb://mongo:27017/posts
+        #     - EUREKA_SERVER_URI=http://eureka-server:8761/eureka
+        networks:
+            - app-network
+
+    history-service:
+        build:
+            context: ./history-service
+        ports:
+            - "8083:8083"
+        # depends_on:
+        #     - mysql-history
+        #     - eureka-server
+        # environment:
+        #     - DB_HOST=mysql-history
+        #     - DB_PORT=3306
+        #     - DB_USER=root
+        #     - DB_PASSWORD=root
+        #     - EUREKA_SERVER_URI=http://eureka-server:8761/eureka
+        networks:
+            - app-network
+
+    messages-service:
+        build:
+            context: ./messages-service
+        ports:
+            - "8084:8084"
+        # depends_on:
+        #     - mysql-messages
+        #     - eureka-server
+        # environment:
+        #     - DB_HOST=mysql-messages
+        #     - DB_PORT=3306
+        #     - DB_USER=root
+        #     - DB_PASSWORD=root
+        #     - EUREKA_SERVER_URI=http://eureka-server:8761/eureka
+        networks:
+            - app-network
+
+    auth-service:
+        build:
+            context: ./auth-service
+        ports:
+            - "8085:8085"
+        # depends_on:
+        #     - eureka-server
+        # environment:
+        #     - EUREKA_SERVER_URI=http://eureka-server:8761/eureka
+        networks:
+            - app-network
+
+    file-service:
+        build:
+            context: ./file-service
+        ports:
+            - "8086:8086"
+        # depends_on:
+        #     - eureka-server
+        # environment:
+        #     - EUREKA_SERVER_URI=http://eureka-server:8761/eureka
+        #     - AWS_S3_BUCKET_NAME=my-bucket
+        #     - AWS_REGION=us-east-1
+        networks:
+            - app-network
+
+    email-service:
+        build:
+            context: ./email-service
+        ports:
+            - "8087:8087"
+        # depends_on:
+        #     - eureka-server
+        # environment:
+        #     - EUREKA_SERVER_URI=http://eureka-server:8761/eureka
+        #     - EMAIL_HOST=smtp.example.com
+        #     - EMAIL_PORT=587
+        #     - EMAIL_USER=myemail@example.com
+        #     - EMAIL_PASSWORD=myemailpassword
+        networks:
+            - app-network
+    # mysql-users:
+    #     image: mysql:8.0
+    #     container_name: mysql-users
+    #     environment:
+    #         MYSQL_ROOT_PASSWORD: root
+    #         MYSQL_DATABASE: users_db
+    #     ports:
+    #         - "3306:3306"
+    #     networks:
+    #         - app-network
+
+    # mysql-history:
+    #     image: mysql:8.0
+    #     container_name: mysql-history
+    #     environment:
+    #         MYSQL_ROOT_PASSWORD: root
+    #         MYSQL_DATABASE: history_db
+    #     ports:
+    #         - "3307:3306"
+    #     networks:
+    #         - app-network
+
+    # mysql-messages:
+    #     image: mysql:8.0
+    #     container_name: mysql-messages
+    #     environment:
+    #         MYSQL_ROOT_PASSWORD: root
+    #         MYSQL_DATABASE: messages_db
+    #     ports:
+    #         - "3308:3306"
+    #     networks:
+    #         - app-network
+
+    # mongo:
+    #     image: mongo
+    #     container_name: mongo
+    #     ports:
+    #         - "27017:27017"
+    #     networks:
+    #         - app-network
+
+networks:
+    app-network:
+        driver: bridge
