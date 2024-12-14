@@ -5,8 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="eb23e553-4f52-413e-8f33-b17126d5d754" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/file-service/src/main/java/com/beaconfire/file_service/Service/S3Service.java" beforeDir="false" afterPath="$PROJECT_DIR$/file-service/src/main/java/com/beaconfire/file_service/Service/S3Service.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/file-service/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/file-service/src/main/resources/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,6 +37,21 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
+  <component name="RunManager">
+    <configuration default="true" type="JetRunConfigurationType">
+      <module name="online-forum-app-backend" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType">
+      <module name="online-forum-app-backend" />
+      <option name="filePath" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -57,6 +71,7 @@
       <workItem from="1734130402431" duration="122000" />
       <workItem from="1734130730637" duration="2167000" />
       <workItem from="1734206088504" duration="1183000" />
+      <workItem from="1734209299468" duration="80000" />
     </task>
     <servers />
   </component>

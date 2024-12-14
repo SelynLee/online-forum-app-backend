@@ -1,9 +1,11 @@
 package com.beaconfire.file_service.Service;
 
+import com.beaconfire.file_service.DTO.FileRequestResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
@@ -49,15 +51,30 @@ public class S3Service {
 
    }
 
-//   /**
-//    *
-//    * @param objectUrl the url specific for files you want to retrieve
-//    * @return file in S3 bucket in byte array
-//    */
-//   public byte[] downloadFile(String objectUrl) {
-//      String key = objectUrl.substring(objectUrl.lastIndexOf("/")+1);
-//
-//   }
+   public FileRequestResponse downloadFile(String objectUrl) {
+      try{
+         String uniqueKey = extractKeyFromUrl(objectUrl);
+
+         GetObjectRequest request = GetObjectRequest.builder()
+               .bucket(bucketName)
+               .key(uniqueKey)
+               .build();
+
+         ResponseBytes<GetObjectResponse> response = s3Client.getObject(request,
+               software.amazon.awssdk.core.sync.ResponseTransformer.toBytes());
+
+         byte[] fileContent = response.asByteArray();
+         String contentType = response.response().contentType();
+
+         return FileRequestResponse.builder()
+               .content(fileContent)
+               .contentType(contentType)
+               .build();
+      }
+      catch(Exception e){
+         throw new RuntimeException("Error downloading file",e);
+      }
+   }
 
    private String generateUniqueKey(String fileName) {
       String uuid = UUID.randomUUID().toString();
@@ -71,5 +88,13 @@ public class S3Service {
       }
 
       return uuid + extension;
+   }
+
+   public String extractKeyFromUrl(String url) {
+      int index = url.lastIndexOf("/");
+      if(index < 0){
+         throw new IllegalArgumentException("Invalid URL");
+      }
+      return url.substring(index + 1);
    }
 }
