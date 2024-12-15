@@ -12,7 +12,7 @@ import lombok.*;
 public class SubReply {
 	
 	private String subReplyId;
-    private Long userId;
+    private Integer userId;
     private String comment;
     private boolean isActive;
     private Date created_at;

@@ -13,7 +13,7 @@ import lombok.*;
 public class PostReply {
 
     private String replyId;
-    private Long userId;
+    private Integer userId;
     private String comment;
     private boolean isActive;
     private Date created_at;

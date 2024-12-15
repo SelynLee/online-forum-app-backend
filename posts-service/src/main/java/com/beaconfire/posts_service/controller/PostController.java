@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.beaconfire.posts_service.domain.Metadata;
 import com.beaconfire.posts_service.domain.Post;
+import com.beaconfire.posts_service.domain.PostReply;
+import com.beaconfire.posts_service.domain.SubReply;
 import com.beaconfire.posts_service.dto.DataResponse;
 import com.beaconfire.posts_service.service.PostService;
 
@@ -134,5 +136,28 @@ public class PostController {
                 .data(updatedPost)
                 .build();
     }
+    
+    @PostMapping("/{postId}/replies")
+    public DataResponse addReplyToPost(@PathVariable String postId, @RequestBody PostReply comment) {
+        Post updatedPost = postService.addReplyToPost(postId, comment);
+        return DataResponse.builder()
+                .success(true)
+                .message("Reply added successfully")
+                .data(updatedPost)
+                .build();
+    }
+    
+    
+    @PostMapping("/{postId}/replies/{replyId}/subreplies")
+    public DataResponse addSubReplyToReply(@PathVariable String postId, @PathVariable String replyId, @RequestBody SubReply subReply) {
+        Post updatedPost = postService.addSubReplyToReply(postId, replyId, subReply);
+        return DataResponse.builder()
+                .success(true)
+                .message("SubReply added successfully")
+                .data(updatedPost)
+                .build();
+    }
+
+
 
 }
