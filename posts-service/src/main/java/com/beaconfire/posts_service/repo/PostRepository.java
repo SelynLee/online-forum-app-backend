@@ -9,7 +9,6 @@ import com.beaconfire.posts_service.domain.Post;
 
 @Repository
 public interface PostRepository extends MongoRepository<Post, String>{
-    List<Post> findByStatus(String status);
     List<Post> findByIsArchived(boolean isArchived);
-    List<Post> findByVisibility(String visibility);
+    List<Post> findByAccessibility(String visibility);
 }

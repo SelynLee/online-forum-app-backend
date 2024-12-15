@@ -35,12 +35,10 @@ public class Post {
 
     @NotNull(message = "User ID is required")
     private Integer userId;
-
-    @NotEmpty(message = "Visibility is required")
-    private String visibility;
-
-    @NotEmpty(message = "Status is required")
-    private String status;
+    
+    //Unpublished ,  Published , Hidden , Banned , Deleted
+    @NotNull(message = "Accessibility is required")
+    private Accessibility accessibility;
 
     private Metadata metadata;
 
@@ -55,4 +53,5 @@ public class Post {
     private List<PostReply> postReplies;
 
     private ModerationInfo moderationInfo;
+
 }

@@ -1,5 +1,6 @@
 package com.beaconfire.posts_service.controller;
 
+import java.util.EnumSet;
 import java.util.List;
 
 import org.springframework.validation.BindingResult;
@@ -13,11 +14,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.beaconfire.posts_service.domain.Accessibility;
 import com.beaconfire.posts_service.domain.Metadata;
 import com.beaconfire.posts_service.domain.Post;
 import com.beaconfire.posts_service.domain.PostReply;
 import com.beaconfire.posts_service.domain.SubReply;
 import com.beaconfire.posts_service.dto.DataResponse;
+import com.beaconfire.posts_service.exception.InvalidAccessibilityException;
+import com.beaconfire.posts_service.exception.PostNotFoundException;
 import com.beaconfire.posts_service.service.PostService;
 
 import jakarta.validation.Valid;
@@ -31,11 +35,22 @@ public class PostController {
     public PostController(PostService postService) {
     	this.postService=postService;
     }
+    private void validateAccessibility(Accessibility accessibility) {
+        if (accessibility == null) {
+            throw new InvalidAccessibilityException("Accessibility must be provided and cannot be null.");
+        }
+
+
+        boolean isValid = EnumSet.allOf(Accessibility.class).contains(accessibility);
+        if (!isValid) {
+            throw new InvalidAccessibilityException("Invalid accessibility value: " + accessibility);
+        }
+    }
 
     @PostMapping
     public DataResponse createPost(@Valid @RequestBody Post post, BindingResult result) {
         if (result.hasErrors()) {
-            // Collect error messages
+            // Collect validation error messages
             String errorMessage = result.getFieldErrors().stream()
                     .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
                     .reduce((msg1, msg2) -> msg1 + ", " + msg2)
@@ -49,21 +64,36 @@ public class PostController {
                     .build();
         }
 
-        // Proceed with saving the post if validation passes
-        Post createdPost = postService.createPost(post);
-        return DataResponse.builder()
-                .success(true)
-                .message("Post created successfully")
-                .data(createdPost)
-                .build();
-    }
+        try {
+            // Validate accessibility
+            validateAccessibility(post.getAccessibility());
 
+            // Save the post
+            Post createdPost = postService.createPost(post);
+            return DataResponse.builder()
+                    .success(true)
+                    .message("Post created successfully")
+                    .data(createdPost)
+                    .build();
+        } catch (InvalidAccessibilityException ex) {
+            return DataResponse.builder()
+                    .success(false)
+                    .message(ex.getMessage())
+                    .data(null)
+                    .build();
+        } catch (Exception ex) {
+            return DataResponse.builder()
+                    .success(false)
+                    .message("An unexpected error occurred: " + ex.getMessage())
+                    .data(null)
+                    .build();
+        }
+    }
 
     @PutMapping("/{postId}")
     public DataResponse updatePost(@PathVariable String postId, @Valid @RequestBody Post updatedPost, BindingResult result) {
-        // Check for validation errors
         if (result.hasErrors()) {
-            // Collect error messages
+            // Collect validation error messages
             String errorMessage = result.getFieldErrors().stream()
                     .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
                     .reduce((msg1, msg2) -> msg1 + ", " + msg2)
@@ -77,13 +107,36 @@ public class PostController {
                     .build();
         }
 
-        // Proceed with updating the post if validation passes
-        Post post = postService.updatePost(postId, updatedPost);
-        return DataResponse.builder()
-                .success(true)
-                .message("Post updated successfully")
-                .data(post)
-                .build();
+        try {
+            // Validate accessibility
+            validateAccessibility(updatedPost.getAccessibility());
+
+            // Update the post
+            Post updatedPostEntity = postService.updatePost(postId, updatedPost);
+            return DataResponse.builder()
+                    .success(true)
+                    .message("Post updated successfully")
+                    .data(updatedPostEntity)
+                    .build();
+        } catch (PostNotFoundException ex) {
+            return DataResponse.builder()
+                    .success(false)
+                    .message(ex.getMessage())
+                    .data(null)
+                    .build();
+        } catch (InvalidAccessibilityException ex) {
+            return DataResponse.builder()
+                    .success(false)
+                    .message(ex.getMessage())
+                    .data(null)
+                    .build();
+        } catch (Exception ex) {
+            return DataResponse.builder()
+                    .success(false)
+                    .message("An unexpected error occurred: " + ex.getMessage())
+                    .data(null)
+                    .build();
+        }
     }
 
 
@@ -107,56 +160,122 @@ public class PostController {
                 .build();
     }
 
-    @GetMapping("/status/{status}")
-    public DataResponse getPostsByStatus(@PathVariable String status) {
-        List<Post> posts = postService.getPostsByStatus(status);
-        return DataResponse.builder()
-                .success(true)
-                .message("Posts with status: " + status + " retrieved successfully")
-                .data(posts)
-                .build();
-    }
+//    @GetMapping("/status/{status}")
+//    public DataResponse getPostsByStatus(@PathVariable String status) {
+//        List<Post> posts = postService.getPostsByStatus(status);
+//        return DataResponse.builder()
+//                .success(true)
+//                .message("Posts with status: " + status + " retrieved successfully")
+//                .data(posts)
+//                .build();
+//    }
 
     @GetMapping("/{postId}")
     public DataResponse getPostById(@PathVariable String postId) {
-        Post post = postService.getPostById(postId);
-        return DataResponse.builder()
-                .success(true)
-                .message("Post retrieved successfully")
-                .data(post)
-                .build();
+        try {
+            // Attempt to retrieve the post
+            Post post = postService.getPostById(postId);
+            return DataResponse.builder()
+                    .success(true)
+                    .message("Post retrieved successfully")
+                    .data(post)
+                    .build();
+        } catch (PostNotFoundException ex) {
+            // Handle case where the post is not found
+            return DataResponse.builder()
+                    .success(false)
+                    .message(ex.getMessage())
+                    .data(null)
+                    .build();
+        } catch (Exception ex) {
+            // Handle any unexpected errors
+            return DataResponse.builder()
+                    .success(false)
+                    .message("An unexpected error occurred: " + ex.getMessage())
+                    .data(null)
+                    .build();
+        }
     }
+
     
     @PatchMapping("/{postId}/metadata")
     public DataResponse updateMetadata(@PathVariable String postId, @RequestBody Metadata metadata) {
-        Post updatedPost = postService.updateMetadata(postId, metadata);
-        return DataResponse.builder()
+    	try {
+    	Post updatedPost = postService.updateMetadata(postId, metadata);
+    	return DataResponse.builder()
                 .success(true)
                 .message("Metadata updated successfully")
                 .data(updatedPost)
                 .build();
+    } catch (PostNotFoundException ex) {
+        // Handle case where the post is not found
+        return DataResponse.builder()
+                .success(false)
+                .message(ex.getMessage())
+                .data(null)
+                .build();
+    } catch (Exception ex) {
+        // Handle any unexpected errors
+        return DataResponse.builder()
+                .success(false)
+                .message("An unexpected error occurred: " + ex.getMessage())
+                .data(null)
+                .build();
     }
+}
     
     @PostMapping("/{postId}/replies")
     public DataResponse addReplyToPost(@PathVariable String postId, @RequestBody PostReply comment) {
-        Post updatedPost = postService.addReplyToPost(postId, comment);
-        return DataResponse.builder()
+    	try {
+    	Post updatedPost = postService.addReplyToPost(postId, comment);
+    	return DataResponse.builder()
                 .success(true)
-                .message("Reply added successfully")
+                .message("Replied successfully")
                 .data(updatedPost)
                 .build();
+    } catch (PostNotFoundException ex) {
+        // Handle case where the post is not found
+        return DataResponse.builder()
+                .success(false)
+                .message(ex.getMessage())
+                .data(null)
+                .build();
+    } catch (Exception ex) {
+        // Handle any unexpected errors
+        return DataResponse.builder()
+                .success(false)
+                .message("An unexpected error occurred: " + ex.getMessage())
+                .data(null)
+                .build();
     }
+  }
     
     
     @PostMapping("/{postId}/replies/{replyId}/subreplies")
     public DataResponse addSubReplyToReply(@PathVariable String postId, @PathVariable String replyId, @RequestBody SubReply subReply) {
-        Post updatedPost = postService.addSubReplyToReply(postId, replyId, subReply);
-        return DataResponse.builder()
+    	try {
+    	Post updatedPost = postService.addSubReplyToReply(postId, replyId, subReply);
+    	return DataResponse.builder()
                 .success(true)
-                .message("SubReply added successfully")
+                .message("Replied successfully")
                 .data(updatedPost)
                 .build();
+    } catch (PostNotFoundException ex) {
+        // Handle case where the post is not found
+        return DataResponse.builder()
+                .success(false)
+                .message(ex.getMessage())
+                .data(null)
+                .build();
+    } catch (Exception ex) {
+        // Handle any unexpected errors
+        return DataResponse.builder()
+                .success(false)
+                .message("An unexpected error occurred: " + ex.getMessage())
+                .data(null)
+                .build();
     }
+  }
 
 
 
