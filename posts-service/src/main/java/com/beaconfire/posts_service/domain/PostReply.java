@@ -16,7 +16,7 @@ public class PostReply {
     private Integer userId;
     private String comment;
     // for deleting the reply
-    private boolean isActive;
+    private boolean isDeleted;
     private Date created_at;
     private Date updated_at;
     private List<SubReply> subReplies;

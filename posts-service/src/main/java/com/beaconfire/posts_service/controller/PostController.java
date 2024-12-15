@@ -1,5 +1,6 @@
 package com.beaconfire.posts_service.controller;
 
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -142,13 +143,30 @@ public class PostController {
 
     @DeleteMapping("/{postId}")
     public DataResponse deletePost(@PathVariable String postId) {
-        postService.deletePost(postId);
+   	try {
+    	postService.deletePost(postId);
         return DataResponse.builder()
                 .success(true)
                 .message("Post deleted successfully")
                 .data(null)
                 .build();
+    
+    }catch (PostNotFoundException ex) {
+        // Handle case where the post is not found
+        return DataResponse.builder()
+                .success(false)
+                .message(ex.getMessage())
+                .data(null)
+                .build();
+    } catch (Exception ex) {
+        // Handle any unexpected errors
+        return DataResponse.builder()
+                .success(false)
+                .message("An unexpected error occurred: " + ex.getMessage())
+                .data(null)
+                .build();
     }
+}
 
     @GetMapping
     public DataResponse getAllPosts() {
@@ -169,6 +187,33 @@ public class PostController {
 //                .data(posts)
 //                .build();
 //    }
+    @GetMapping("/accessibility/{accessibility}")
+    public DataResponse getPostsByAccessibility(@PathVariable String accessibility) {
+        try {
+            Accessibility parsedAccessibility = Accessibility.valueOf(accessibility.toUpperCase());
+            List<Post> posts = postService.getPostsByAccessibility(parsedAccessibility);
+            return DataResponse.builder()
+                    .success(true)
+                    .message("Posts retrieved successfully for accessibility: " + parsedAccessibility)
+                    .data(posts)
+                    .build();
+        } catch (IllegalArgumentException ex) {
+            return DataResponse.builder()
+                    .success(false)
+                    .message("Invalid accessibility value. Accepted values are: " +
+                            String.join(", ", EnumSet.allOf(Accessibility.class).stream().map(Enum::name).toList()))
+                    .data(null)
+                    .build();
+        } catch (Exception ex) {
+            return DataResponse.builder()
+                    .success(false)
+                    .message("An unexpected error occurred: " + ex.getMessage())
+                    .data(null)
+                    .build();
+        }
+    }
+
+
 
     @GetMapping("/{postId}")
     public DataResponse getPostById(@PathVariable String postId) {
@@ -276,6 +321,64 @@ public class PostController {
                 .build();
     }
   }
+    @PutMapping("/{postId}/replies/{replyId}")
+    public DataResponse updateReply(
+            @PathVariable String postId,
+            @PathVariable String replyId,
+            @RequestBody @Valid PostReply updatedReply) {
+        try {
+            // Attempt to update the reply
+            Post updatedPost = postService.updateReply(postId, replyId, updatedReply);
+            return DataResponse.builder()
+                    .success(true)
+                    .message("Reply updated successfully")
+                    .data(updatedPost)
+                    .build();
+        } catch (PostNotFoundException ex) {
+            return DataResponse.builder()
+                    .success(false)
+                    .message("Error: " + ex.getMessage())
+                    .data(null)
+                    .build();
+        } catch (Exception ex) {
+            return DataResponse.builder()
+                    .success(false)
+                    .message("An unexpected error occurred: " + ex.getMessage())
+                    .data(null)
+                    .build();
+        }
+    }
+    
+    @PutMapping("/{postId}/replies/{replyId}/subreplies/{subReplyId}")
+    public DataResponse updateSubReply(
+            @PathVariable String postId,
+            @PathVariable String replyId,
+            @PathVariable String subReplyId,
+            @RequestBody @Valid SubReply updatedSubReply) {
+        try {
+            // Attempt to update the sub-reply
+            Post updatedPost = postService.updateSubReply(postId, replyId, subReplyId, updatedSubReply);
+            return DataResponse.builder()
+                    .success(true)
+                    .message("Sub-reply updated successfully")
+                    .data(updatedPost)
+                    .build();
+        } catch (PostNotFoundException ex) {
+            return DataResponse.builder()
+                    .success(false)
+                    .message("Error: " + ex.getMessage())
+                    .data(null)
+                    .build();
+        } catch (Exception ex) {
+            return DataResponse.builder()
+                    .success(false)
+                    .message("An unexpected error occurred: " + ex.getMessage())
+                    .data(null)
+                    .build();
+        }
+    }
+
+
 
 
 

@@ -18,6 +18,8 @@ import com.beaconfire.posts_service.exception.PostNotFoundException;
 import com.beaconfire.posts_service.exception.ReplyNotFoundException;
 import com.beaconfire.posts_service.repo.PostRepository;
 
+import jakarta.validation.Valid;
+
 @Service
 public class PostService {
 
@@ -89,6 +91,7 @@ public class PostService {
                 .orElseThrow(() -> new PostNotFoundException("Post not found with ID: " + postId));
 
         reply.setReplyId(UUID.randomUUID().toString());
+        reply.setDeleted(false);
         reply.setCreated_at(new Date());
         reply.setUpdated_at(new Date());
 
@@ -110,6 +113,7 @@ public class PostService {
                 .orElseThrow(() -> new ReplyNotFoundException("Reply not found with ID: " + replyId));
 
         subReply.setSubReplyId(UUID.randomUUID().toString());
+        subReply.setDeleted(false);
         subReply.setCreated_at(new Date());
         subReply.setUpdated_at(new Date());
 
@@ -129,4 +133,61 @@ public class PostService {
         
         return postRepository.save(existingPost);
     }
+
+
+
+    public List<Post> getPostsByAccessibility(Accessibility accessibility) {
+       
+        return postRepository.findByAccessibility(accessibility);
+    }
+
+
+
+    public Post updateReply(String postId, String replyId, PostReply updatedReply) {
+        // Find the post by ID
+        Post existingPost = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException("Post not found with ID: " + postId));
+
+        // Find the target reply by ID
+        PostReply targetReply = existingPost.getPostReplies().stream()
+                .filter(reply -> reply.getReplyId().equals(replyId))
+                .findFirst()
+                .orElseThrow(() -> new PostNotFoundException("Reply not found with ID: " + replyId));
+
+        // Update reply fields
+        targetReply.setComment(updatedReply.getComment());
+        targetReply.setUpdated_at(new Date());
+
+        // Save and return the updated post
+        return postRepository.save(existingPost);
+    }
+    public Post updateSubReply(String postId, String replyId, String subReplyId, SubReply updatedSubReply) {
+        // Find the post by ID
+        Post existingPost = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException("Post not found with ID: " + postId));
+
+        // Find the target reply by ID
+        PostReply targetReply = existingPost.getPostReplies().stream()
+                .filter(reply -> reply.getReplyId().equals(replyId))
+                .findFirst()
+                .orElseThrow(() -> new PostNotFoundException("Reply not found with ID: " + replyId));
+
+        // Find the target sub-reply by ID
+        SubReply targetSubReply = targetReply.getSubReplies().stream()
+                .filter(subReply -> subReply.getSubReplyId().equals(subReplyId))
+                .findFirst()
+                .orElseThrow(() -> new PostNotFoundException("Sub-reply not found with ID: " + subReplyId));
+
+        // Update sub-reply fields
+        targetSubReply.setComment(updatedSubReply.getComment());
+        targetSubReply.setUpdated_at(new Date());
+
+        // Save and return the updated post
+        return postRepository.save(existingPost);
+    }
+
+    
+    
+
+
 }
