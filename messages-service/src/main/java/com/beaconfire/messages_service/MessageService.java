@@ -2,8 +2,8 @@ package com.beaconfire.messages_service;
 
 import com.beaconfire.messages_service.dto.MessageRequestDTO;
 import com.beaconfire.messages_service.dto.MessageResponseDTO;
-import com.beaconfire.messages_service.dto.MessageStatusUpdateDTO;
-import org.apache.logging.log4j.message.Message;
+import com.beaconfire.messages_service.entity.Message;
+import com.beaconfire.messages_service.repository.MessageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,7 +38,9 @@ public class MessageService {
         Message message = messageRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Message not found"));
         message.setStatus(status);
+        
         Message updatedMessage = messageRepository.save(message);
+
         return mapToResponseDTO(updatedMessage);
     }
 
