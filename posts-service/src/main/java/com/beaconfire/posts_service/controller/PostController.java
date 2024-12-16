@@ -1,6 +1,6 @@
 package com.beaconfire.posts_service.controller;
 
-import java.util.Arrays;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -212,6 +212,48 @@ public class PostController {
                     .build();
         }
     }
+    @PatchMapping("/{postId}/accessibility")
+    public DataResponse updateAccessibility(
+            @PathVariable String postId,
+            @RequestBody String accessibility) {
+        try {
+            // Convert the accessibility string to an enum value
+            Accessibility parsedAccessibility = Accessibility.valueOf(accessibility.toUpperCase());
+
+            // Update the accessibility of the post
+            Post updatedPost = postService.updateAccessibility(postId, parsedAccessibility);
+
+            return DataResponse.builder()
+                    .success(true)
+                    .message("Accessibility updated successfully")
+                    .data(updatedPost)
+                    .build();
+        } catch (IllegalArgumentException ex) {
+            // Handle invalid accessibility values
+            return DataResponse.builder()
+                    .success(false)
+                    .message("Invalid accessibility value. Accepted values are: " +
+                            String.join(", ", EnumSet.allOf(Accessibility.class).stream().map(Enum::name).toList()))
+                    .data(null)
+                    .build();
+        } catch (PostNotFoundException ex) {
+            // Handle case where the post is not found
+            return DataResponse.builder()
+                    .success(false)
+                    .message(ex.getMessage())
+                    .data(null)
+                    .build();
+        } catch (Exception ex) {
+            // Handle any unexpected errors
+            return DataResponse.builder()
+                    .success(false)
+                    .message("An unexpected error occurred: " + ex.getMessage())
+                    .data(null)
+                    .build();
+        }
+    }
+
+
 
 
 

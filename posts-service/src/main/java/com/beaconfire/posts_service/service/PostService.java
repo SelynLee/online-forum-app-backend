@@ -53,13 +53,20 @@ public class PostService {
     public Post updatePost(String postId, Post updatedPost) {
         Post existingPost = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Post not found with ID: " + postId));
-//        validateAccessibility(updatedPost.getAccessibility());
+
+        // Check if the accessibility is being changed
+//        if (!existingPost.getAccessibility().equals(updatedPost.getAccessibility())) {
+//            throw new IllegalArgumentException("You are not allowed to change the accessibility of the post.");
+//        }
+
         existingPost.setTitle(updatedPost.getTitle());
         existingPost.setContent(updatedPost.getContent());
         existingPost.setArchived(updatedPost.isArchived());
         existingPost.setUpdated_at(new Date());
+
         return postRepository.save(existingPost);
     }
+
 
     public void deletePost(String postId) {
         Post post = postRepository.findById(postId)
@@ -67,6 +74,17 @@ public class PostService {
         post.setAccessibility(Accessibility.DELETED);
         postRepository.save(post);
     }
+    public Post updateAccessibility(String postId, Accessibility accessibility) {
+        Post existingPost = postRepository.findById(postId)
+                .orElseThrow(() -> new PostNotFoundException("Post not found with ID: " + postId));
+
+        // Update accessibility
+        existingPost.setAccessibility(accessibility);
+        existingPost.setUpdated_at(new Date());
+
+        return postRepository.save(existingPost);
+    }
+
 
     public List<Post> getAllPosts() {
         return postRepository.findAll();
