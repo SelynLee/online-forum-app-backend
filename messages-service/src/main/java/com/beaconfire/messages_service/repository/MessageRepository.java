@@ -1,6 +1,6 @@
-package com.beaconfire.messages_service;
+package com.beaconfire.messages_service.repository;
 
-import org.apache.logging.log4j.message.Message;
+import com.beaconfire.messages_service.entity.Message;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
