@@ -6,6 +6,8 @@ services:
             - "8761:8761"
         networks:
             - app-network
+        env_file:
+            - .env
 
     api-gateway:
         build:
@@ -101,12 +103,14 @@ services:
             context: ./file-service
         ports:
             - "8086:8086"
-        # depends_on:
-        #     - eureka-server
-        # environment:
-        #     - EUREKA_SERVER_URI=http://eureka-server:8761/eureka
-        #     - AWS_S3_BUCKET_NAME=my-bucket
-        #     - AWS_REGION=us-east-1
+#        depends_on:
+#             - eureka-server
+        environment:
+#             - EUREKA_SERVER_URI=http://eureka-server:8761/eureka
+#             - AWS_S3_BUCKET_NAME=my-bucket
+#             - AWS_REGION=us-east-1
+             - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+             - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
         networks:
             - app-network
 
