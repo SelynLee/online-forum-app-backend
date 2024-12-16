@@ -27,6 +27,11 @@ public class S3Controller {
       this.s3Service = s3Service;
    }
 
+   @GetMapping
+   public ResponseEntity<String> test() {
+      return ResponseEntity.ok().body("TEST!!!");
+   }
+
    @PostMapping("/upload")
    public ResponseEntity<FileUploadResponse> uploadFile(@RequestParam("file") MultipartFile file) {
       try{
