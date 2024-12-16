@@ -3,15 +3,14 @@ package com.beaconfire.users_service.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import com.beaconfire.users_service.InvalidCredentialsException;
+
 import com.beaconfire.users_service.domain.User;
 import com.beaconfire.users_service.dto.UserDTO;
+import com.beaconfire.users_service.exception.InvalidCredentialsException;
 import com.beaconfire.users_service.repo.UserRepo;
 
 @Service
-@Transactional
 public class UserService {
 
     private final UserRepo userDao;
@@ -24,14 +23,17 @@ public class UserService {
     }
 
     // Register a new user
+ // Register a new user
     public UserDTO registerUser(User user) {
         userDao.findByEmail(user.getEmail()).ifPresent(u -> {
             throw new IllegalArgumentException("Email already exists");
         });
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setType(User.UserType.valueOf(user.getType().name().toUpperCase()));     
         userDao.save(user);
         return UserDTO.fromUser(user);
     }
+
 
     // Authenticate a user by email and password
     public UserDTO authenticateUser(String email, String password) throws InvalidCredentialsException {

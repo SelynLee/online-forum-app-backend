@@ -3,17 +3,26 @@ package com.beaconfire.users_service.domain;
 
 import java.time.LocalDateTime;
 
-import org.springframework.data.annotation.Id;
+import com.fasterxml.jackson.annotation.JsonCreator;
 
-import jakarta.persistence.*;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
-
-
-
-
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 
 @Entity
@@ -75,7 +84,11 @@ public class User {
     }
 
     public enum UserType {
-        Visitor, Normal, Admin, SuperAdmin
+        VISITOR, NORMAL, ADMIN, SUPERADMIN;
+        @JsonCreator
+        public static UserType fromValue(String value) {
+        	return UserType.valueOf(value.toUpperCase());
+        }
     }
 }
 
