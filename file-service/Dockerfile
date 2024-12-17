@@ -1,30 +1,8 @@
-# Build the application using Maven
-FROM maven:3.8.5-openjdk-17-slim AS build
-
-# Set the working directory for the build
-WORKDIR /app
-
-# Copy the Maven project files into the container
-COPY pom.xml .
-COPY src ./src
-
-# Run the Maven build command to create the JAR file
-RUN mvn clean package -DskipTests
-
-# Use OpenJDK to run the application
 FROM openjdk:17-jdk-slim
-
-# Set the working directory for the runtime
 WORKDIR /app
-
-# Copy the JAR file from the build stage into the runtime stage
-COPY --from=build /app/target/file-service.jar .
-
-ENV AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
-ENV AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-
-# Expose the File Service port
+COPY target/file-service.jar .
 EXPOSE 8086
 
-# Define the command to run the application
+# ENV AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+# ENV AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
 CMD ["java", "-jar", "file-service.jar"]

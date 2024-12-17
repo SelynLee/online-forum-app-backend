@@ -1,24 +1,11 @@
-# Build the application using Maven
-FROM maven:3.8.5-openjdk-17-slim AS build
-
-# Set the working directory for the build
-WORKDIR /app
-
-# Copy the Maven project files into the container
-COPY pom.xml .
-COPY src ./src
-
-# Run the Maven build command to create the JAR file
-RUN mvn clean package -DskipTests
-
-# Use OpenJDK to run the application
+# Use OpenJDK as the base image
 FROM openjdk:17-jdk-slim
 
-# Set the working directory for the runtime
+# Set the working directory inside the container
 WORKDIR /app
 
-# Copy the JAR file from the build stage into the runtime stage
-COPY --from=build /app/target/messages-service.jar .
+# Copy the JAR file into the container
+COPY target/messages-service.jar .
 
 # Expose the Messages Service port
 EXPOSE 8084
