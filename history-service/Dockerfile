@@ -1,5 +1,5 @@
 # Build the application using Maven
-FROM maven:3.8.8-openjdk-17-slim AS build
+FROM maven:3.8.5-openjdk-17-slim AS build
 
 # Set the working directory for the build
 WORKDIR /app
