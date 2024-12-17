@@ -1,6 +1,5 @@
 package com.beaconfire.posts_service.controller;
 
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -25,10 +24,13 @@ import com.beaconfire.posts_service.exception.InvalidAccessibilityException;
 import com.beaconfire.posts_service.exception.PostNotFoundException;
 import com.beaconfire.posts_service.service.PostService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/posts")
+@Tag(name = "Post Service", description = "Endpoints for managing posts")
 public class PostController {
 
    
@@ -47,7 +49,8 @@ public class PostController {
             throw new InvalidAccessibilityException("Invalid accessibility value: " + accessibility);
         }
     }
-
+    
+    @Operation(summary = "Create a new post", description = "Creates a new post with the given details.")
     @PostMapping
     public DataResponse createPost(@Valid @RequestBody Post post, BindingResult result) {
         if (result.hasErrors()) {
@@ -90,7 +93,7 @@ public class PostController {
                     .build();
         }
     }
-
+    @Operation(summary = "Update an existing post", description = "Updates the details of an existing post by its ID.")
     @PutMapping("/{postId}")
     public DataResponse updatePost(@PathVariable String postId, @Valid @RequestBody Post updatedPost, BindingResult result) {
         if (result.hasErrors()) {
@@ -140,7 +143,7 @@ public class PostController {
         }
     }
 
-
+    @Operation(summary = "Delete a post", description = "Deletes a post by its ID.")
     @DeleteMapping("/{postId}")
     public DataResponse deletePost(@PathVariable String postId) {
    	try {
@@ -167,7 +170,7 @@ public class PostController {
                 .build();
     }
 }
-
+    @Operation(summary = "Get all posts", description = "Retrieves a list of all posts.")
     @GetMapping
     public DataResponse getAllPosts() {
         List<Post> posts = postService.getAllPosts();
@@ -187,6 +190,8 @@ public class PostController {
 //                .data(posts)
 //                .build();
 //    }
+    
+    @Operation(summary = "Get posts by accessibility", description = "Retrieves posts filtered by accessibility status.")
     @GetMapping("/accessibility/{accessibility}")
     public DataResponse getPostsByAccessibility(@PathVariable String accessibility) {
         try {
@@ -212,6 +217,7 @@ public class PostController {
                     .build();
         }
     }
+    @Operation(summary = "Update post accessibility", description = "Updates the accessibility status of a post by its ID.")
     @PatchMapping("/{postId}/accessibility")
     public DataResponse updateAccessibility(
             @PathVariable String postId,
@@ -256,7 +262,7 @@ public class PostController {
 
 
 
-
+    @Operation(summary = "Get post by ID", description = "Retrieves a post by its ID.")
     @GetMapping("/{postId}")
     public DataResponse getPostById(@PathVariable String postId) {
         try {
@@ -284,7 +290,7 @@ public class PostController {
         }
     }
 
-    
+    @Operation(summary = "Update post metadata", description = "Updates the metadata of a post by its ID.")
     @PatchMapping("/{postId}/metadata")
     public DataResponse updateMetadata(@PathVariable String postId, @RequestBody Metadata metadata) {
     	try {
@@ -310,7 +316,7 @@ public class PostController {
                 .build();
     }
 }
-    
+    @Operation(summary = "Add a reply to a post", description = "Adds a new reply to a specified post.")
     @PostMapping("/{postId}/replies")
     public DataResponse addReplyToPost(@PathVariable String postId, @RequestBody PostReply comment) {
     	try {
@@ -337,7 +343,7 @@ public class PostController {
     }
   }
     
-    
+    @Operation(summary = "Add a sub-reply to a reply", description = "Adds a sub-reply to a specific reply in a post.")
     @PostMapping("/{postId}/replies/{replyId}/subreplies")
     public DataResponse addSubReplyToReply(@PathVariable String postId, @PathVariable String replyId, @RequestBody SubReply subReply) {
     	try {
@@ -363,6 +369,7 @@ public class PostController {
                 .build();
     }
   }
+    @Operation(summary = "Update a reply", description = "Updates a specific reply in a post.")
     @PutMapping("/{postId}/replies/{replyId}")
     public DataResponse updateReply(
             @PathVariable String postId,
@@ -390,7 +397,7 @@ public class PostController {
                     .build();
         }
     }
-    
+    @Operation(summary = "Update a sub-reply", description = "Updates a specific sub-reply of a reply in a post.")
     @PutMapping("/{postId}/replies/{replyId}/subreplies/{subReplyId}")
     public DataResponse updateSubReply(
             @PathVariable String postId,
