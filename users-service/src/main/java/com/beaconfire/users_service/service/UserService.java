@@ -14,37 +14,12 @@ import com.beaconfire.users_service.repo.UserRepo;
 public class UserService {
 
     private final UserRepo userDao;
-    private final PasswordEncoder passwordEncoder;
+
 
     @Autowired
-    public UserService(UserRepo userDao, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepo userDao) {
         this.userDao = userDao;
-        this.passwordEncoder = passwordEncoder;
-    }
 
-    // Register a new user
- // Register a new user
-    public UserDTO registerUser(User user) {
-        userDao.findByEmail(user.getEmail()).ifPresent(u -> {
-            throw new IllegalArgumentException("Email already exists");
-        });
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setType(User.UserType.valueOf(user.getType().name().toUpperCase()));     
-        userDao.save(user);
-        return UserDTO.fromUser(user);
-    }
-
-
-    // Authenticate a user by email and password
-    public UserDTO authenticateUser(String email, String password) throws InvalidCredentialsException {
-        User user = userDao.findByEmail(email)
-                           .orElseThrow(() -> new InvalidCredentialsException("Incorrect credentials, please try again."));
-
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new InvalidCredentialsException("Incorrect credentials, please try again.");
-        }
-
-        return UserDTO.fromUser(user);
     }
 
     // Find user by ID
