@@ -49,13 +49,13 @@ cd online-forum-app-backend
 
 Before running the microservices, perform the following steps:
 
-1. Navigate to each service directory and execute the Maven commands:
+1. Navigate to the root directory of the project (where the `docker-compose.yml` is located) and execute the following Maven command to clean, compile, and install all services:
 
    ```bash
-   mvn clean install
+   mvn clean install -T 2C
    ```
 
-2. Return to the root directory (where the `docker-compose.yml` file is located) and run:
+2. From the root directory (where the `docker-compose.yml` file is located) and run:
 
    ```bash
    docker compose up --build
