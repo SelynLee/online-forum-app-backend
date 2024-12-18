@@ -3,6 +3,8 @@ package com.beaconfire.file_service.Controller;
 import com.beaconfire.file_service.DTO.FileRequestResponse;
 import com.beaconfire.file_service.DTO.FileUploadResponse;
 import com.beaconfire.file_service.Service.S3Service;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -16,6 +18,7 @@ import java.io.FileOutputStream;
 
 @RestController
 @RequestMapping("/files")
+@Tag(name = "Fire Microservice", description = "APIs for file upload and download")
 public class S3Controller {
    private final String SUCCESS_MESSAGE = "File successfully uploaded";
    private final String FAILURE_MESSAGE = "File could not be uploaded";
@@ -33,6 +36,7 @@ public class S3Controller {
    }
 
    @PostMapping("/upload")
+   @Operation(summary = "Upload a file", description = "Uploads a file to AWS S3 and returns the file URL.")
    public ResponseEntity<FileUploadResponse> uploadFile(@RequestParam("file") MultipartFile file) {
       try{
          String url = s3Service.uploadFile(file);
@@ -52,10 +56,11 @@ public class S3Controller {
    }
 
    @GetMapping("/download")
+   @Operation(summary = "Download a file", description = "Downloads a file from AWS S3 based on the given object URL.")
    public ResponseEntity<byte[]> downloadFile(@RequestParam("objectUrl") String objectUrl) {
       try{
          FileRequestResponse response = s3Service.downloadFile(objectUrl);
-         String fileName = s3Service.extractKeyFromUrl(objectUrl);
+         String fileName = extractKeyFromUrl(objectUrl);
 
          return ResponseEntity.ok()
                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
@@ -65,5 +70,13 @@ public class S3Controller {
       catch(Exception e){
          return ResponseEntity.status(500).body(null);
       }
+   }
+
+   private String extractKeyFromUrl(String url) {
+      int index = url.lastIndexOf("/");
+      if(index < 0){
+         throw new IllegalArgumentException("Invalid URL");
+      }
+      return url.substring(index + 1);
    }
 }
