@@ -10,5 +10,4 @@ import com.beaconfire.users_service.domain.User;
 @Repository
 public interface UserRepo extends JpaRepository<User, Integer> {
     Optional<User> findByEmail(String email);
-    Optional<User> findByEmailAndPassword(String email, String password);
 }

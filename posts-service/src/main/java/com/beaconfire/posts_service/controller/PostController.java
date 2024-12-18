@@ -3,6 +3,7 @@ package com.beaconfire.posts_service.controller;
 import java.util.EnumSet;
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.beaconfire.posts_service.domain.Accessibility;
@@ -19,9 +21,12 @@ import com.beaconfire.posts_service.domain.Metadata;
 import com.beaconfire.posts_service.domain.Post;
 import com.beaconfire.posts_service.domain.PostReply;
 import com.beaconfire.posts_service.domain.SubReply;
+import com.beaconfire.posts_service.dto.AccessibilityRequest;
 import com.beaconfire.posts_service.dto.DataResponse;
+import com.beaconfire.posts_service.dto.PostWithUserDTO;
 import com.beaconfire.posts_service.exception.InvalidAccessibilityException;
 import com.beaconfire.posts_service.exception.PostNotFoundException;
+import com.beaconfire.posts_service.exception.ReplyNotFoundException;
 import com.beaconfire.posts_service.service.PostService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,6 +36,7 @@ import jakarta.validation.Valid;
 @RestController
 @RequestMapping("/posts")
 @Tag(name = "Post Service", description = "Endpoints for managing posts")
+
 public class PostController {
 
    
@@ -142,6 +148,20 @@ public class PostController {
                     .build();
         }
     }
+    @Operation(summary = "Get top 3 posts by user", description = "Fetches the top 3 posts of a user, sorted by the number of replies in descending order")
+    @GetMapping("/user/{userId}/top3")
+    public ResponseEntity<DataResponse> getTop3PostsByUser(@PathVariable Integer userId) {
+        List<Post> topPosts = postService.getTop3PostsByUser(userId);
+
+        return ResponseEntity.ok(
+                DataResponse.builder()
+                        .success(true)
+                        .message("Top 3 posts retrieved successfully for user ID: " + userId)
+                        .data(topPosts)
+                        .build()
+        );
+    }
+
 
     @Operation(summary = "Delete a post", description = "Deletes a post by its ID.")
     @DeleteMapping("/{postId}")
@@ -173,7 +193,7 @@ public class PostController {
     @Operation(summary = "Get all posts", description = "Retrieves a list of all posts.")
     @GetMapping
     public DataResponse getAllPosts() {
-        List<Post> posts = postService.getAllPosts();
+        List<PostWithUserDTO > posts = postService.getAllPosts();
         return DataResponse.builder()
                 .success(true)
                 .message("Posts retrieved successfully")
@@ -181,15 +201,20 @@ public class PostController {
                 .build();
     }
 
-//    @GetMapping("/status/{status}")
-//    public DataResponse getPostsByStatus(@PathVariable String status) {
-//        List<Post> posts = postService.getPostsByStatus(status);
-//        return DataResponse.builder()
-//                .success(true)
-//                .message("Posts with status: " + status + " retrieved successfully")
-//                .data(posts)
-//                .build();
-//    }
+    @Operation(summary = "Get posts by user ID", description = "Retrieves all posts created by a specific user.")
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<DataResponse> getPostsWithUserByUserId(
+            @PathVariable Integer userId) {
+        List<PostWithUserDTO> postsWithUser = postService.getPostsByUserId(userId);
+
+        return ResponseEntity.ok(
+                DataResponse.builder()
+                        .success(true)
+                        .message("Posts fetched successfully for user ID: " + userId)
+                        .data(postsWithUser)
+                        .build()
+        );
+    }
     
     @Operation(summary = "Get posts by accessibility", description = "Retrieves posts filtered by accessibility status.")
     @GetMapping("/accessibility/{accessibility}")
@@ -217,21 +242,21 @@ public class PostController {
                     .build();
         }
     }
-    @Operation(summary = "Update post accessibility", description = "Updates the accessibility status of a post by its ID.")
+    @Operation(summary = "Update post accessibility", description = "Updates the accessibility status of a post by its ID. Admins can ban/unban posts; Normal users can hide posts.")
     @PatchMapping("/{postId}/accessibility")
     public DataResponse updateAccessibility(
             @PathVariable String postId,
-            @RequestBody String accessibility) {
+            @RequestBody AccessibilityRequest request) {
         try {
             // Convert the accessibility string to an enum value
-            Accessibility parsedAccessibility = Accessibility.valueOf(accessibility.toUpperCase());
+            Accessibility parsedAccessibility = Accessibility.valueOf(request.getAccessibility().toUpperCase());
 
             // Update the accessibility of the post
-            Post updatedPost = postService.updateAccessibility(postId, parsedAccessibility);
+            Post updatedPost = postService.updateAccessibility(postId, parsedAccessibility, request.getCurrentUserId());
 
             return DataResponse.builder()
                     .success(true)
-                    .message("Accessibility updated successfully")
+                    .message("Accessibility updated successfully.")
                     .data(updatedPost)
                     .build();
         } catch (IllegalArgumentException ex) {
@@ -244,6 +269,13 @@ public class PostController {
                     .build();
         } catch (PostNotFoundException ex) {
             // Handle case where the post is not found
+            return DataResponse.builder()
+                    .success(false)
+                    .message(ex.getMessage())
+                    .data(null)
+                    .build();
+        } catch (RuntimeException ex) {
+            // Handle unauthorized access
             return DataResponse.builder()
                     .success(false)
                     .message(ex.getMessage())
@@ -262,16 +294,19 @@ public class PostController {
 
 
 
+
+
+
     @Operation(summary = "Get post by ID", description = "Retrieves a post by its ID.")
     @GetMapping("/{postId}")
     public DataResponse getPostById(@PathVariable String postId) {
         try {
             // Attempt to retrieve the post
-            Post post = postService.getPostById(postId);
+        	PostWithUserDTO postWithUser = postService.getPostById(postId);
             return DataResponse.builder()
                     .success(true)
                     .message("Post retrieved successfully")
-                    .data(post)
+                    .data(postWithUser)
                     .build();
         } catch (PostNotFoundException ex) {
             // Handle case where the post is not found
@@ -426,6 +461,156 @@ public class PostController {
                     .build();
         }
     }
+    @Operation(summary = "Soft delete a reply", description = "Soft deletes a reply by marking it as deleted. Only the post owner or an admin can perform this action.")
+    @DeleteMapping("/{postId}/replies/{replyId}/delete")
+    public DataResponse softDeleteReply(
+            @PathVariable String postId,
+            @PathVariable String replyId,
+            @RequestParam Integer currentUserId) {
+        try {
+            postService.softDeleteReply(postId, replyId, currentUserId);
+            return DataResponse.builder()
+                    .success(true)
+                    .message("Reply has been soft-deleted successfully.")
+                    .data(null)
+                    .build();
+        } catch (ReplyNotFoundException ex) {
+            return DataResponse.builder()
+                    .success(false)
+                    .message("Reply not found: " + ex.getMessage())
+                    .data(null)
+                    .build();
+        } catch (RuntimeException ex) {
+            return DataResponse.builder()
+                    .success(false)
+                    .message("Unauthorized: " + ex.getMessage())
+                    .data(null)
+                    .build();
+        } catch (Exception ex) {
+            return DataResponse.builder()
+                    .success(false)
+                    .message("An unexpected error occurred: " + ex.getMessage())
+                    .data(null)
+                    .build();
+        }
+    }
+    
+    @Operation(summary = "Soft delete a sub-reply", description = "Soft deletes a sub-reply by marking it as deleted. Only the post owner or an admin can perform this action.")
+    @DeleteMapping("/{postId}/replies/{replyId}/sub-replies/{subReplyId}/delete")
+    public DataResponse softDeleteSubReply(
+            @PathVariable String postId,
+            @PathVariable String replyId,
+            @PathVariable String subReplyId,
+            @RequestParam Integer currentUserId) {
+        try {
+            postService.softDeleteSubReply(postId, replyId, subReplyId, currentUserId);
+            return DataResponse.builder()
+                    .success(true)
+                    .message("Sub-reply has been soft-deleted successfully.")
+                    .data(null)
+                    .build();
+        } catch (ReplyNotFoundException ex) {
+            return DataResponse.builder()
+                    .success(false)
+                    .message("Sub-reply not found: " + ex.getMessage())
+                    .data(null)
+                    .build();
+        } catch (RuntimeException ex) {
+            return DataResponse.builder()
+                    .success(false)
+                    .message("Unauthorized: " + ex.getMessage())
+                    .data(null)
+                    .build();
+        } catch (Exception ex) {
+            return DataResponse.builder()
+                    .success(false)
+                    .message("An unexpected error occurred: " + ex.getMessage())
+                    .data(null)
+                    .build();
+        }
+    }
+    
+    @Operation(
+            summary = "Like a Post",
+            description = "Allows a user to like a post. The user's ID is tracked to prevent duplicate likes."
+    )
+    @PatchMapping("/{postId}/like")
+    public ResponseEntity<DataResponse> likePost(
+            @PathVariable String postId,
+            @RequestParam Integer userId) {
+        try {
+            Post updatedPost = postService.likePost(postId, userId);
+            return ResponseEntity.ok(
+                    DataResponse.builder()
+                            .success(true)
+                            .message("Post liked successfully.")
+                            .data(updatedPost)
+                            .build());
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body(
+                    DataResponse.builder()
+                            .success(false)
+                            .message(ex.getMessage())
+                            .data(null)
+                            .build());
+        }
+    }
+
+    @Operation(
+            summary = "Unlike a Post",
+            description = "Allows a user to unlike a post. The user's ID is tracked to ensure proper functionality."
+    )
+    @PatchMapping("/{postId}/unlike")
+    public ResponseEntity<DataResponse> unlikePost(
+            @PathVariable String postId,
+            @RequestParam Integer userId) {
+        try {
+            Post updatedPost = postService.unlikePost(postId, userId);
+            return ResponseEntity.ok(
+                    DataResponse.builder()
+                            .success(true)
+                            .message("Post unliked successfully.")
+                            .data(updatedPost)
+                            .build());
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body(
+                    DataResponse.builder()
+                            .success(false)
+                            .message(ex.getMessage())
+                            .data(null)
+                            .build());
+        }
+    }
+    @Operation(
+            summary = "Increment Post Views",
+            description = "Increments the view count for a post whenever it is accessed."
+    )
+
+    @PatchMapping("/{postId}/views")
+    public ResponseEntity<DataResponse> incrementPostViews(@PathVariable String postId) {
+        try {
+            Post updatedPost = postService.incrementViews(postId);
+            return ResponseEntity.ok(
+                    DataResponse.builder()
+                            .success(true)
+                            .message("Post view count incremented successfully.")
+                            .data(updatedPost.getMetadata().getViews())
+                            .build());
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body(
+                    DataResponse.builder()
+                            .success(false)
+                            .message(ex.getMessage())
+                            .data(null)
+                            .build());
+        }            
+     }
+    
+
+
+
+
+
 
 
 

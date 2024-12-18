@@ -2,6 +2,7 @@ package com.beaconfire.users_service.domain;
 
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
@@ -53,12 +54,10 @@ public class User {
     @Email(message = "Email should be valid")
     private String email;
 
-    @Column(nullable = false)
-    @NotBlank(message = "Password is required")
-    private String password;
 
     @Column(nullable = false)
-    private Boolean active = true;
+    private Boolean active = false;
+
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
