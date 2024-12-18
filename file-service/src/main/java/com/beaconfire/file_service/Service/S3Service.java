@@ -90,7 +90,7 @@ public class S3Service {
       return uuid + extension;
    }
 
-   public String extractKeyFromUrl(String url) {
+   private String extractKeyFromUrl(String url) {
       int index = url.lastIndexOf("/");
       if(index < 0){
          throw new IllegalArgumentException("Invalid URL");

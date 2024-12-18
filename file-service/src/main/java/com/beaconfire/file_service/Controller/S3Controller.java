@@ -60,7 +60,7 @@ public class S3Controller {
    public ResponseEntity<byte[]> downloadFile(@RequestParam("objectUrl") String objectUrl) {
       try{
          FileRequestResponse response = s3Service.downloadFile(objectUrl);
-         String fileName = s3Service.extractKeyFromUrl(objectUrl);
+         String fileName = extractKeyFromUrl(objectUrl);
 
          return ResponseEntity.ok()
                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
@@ -70,5 +70,13 @@ public class S3Controller {
       catch(Exception e){
          return ResponseEntity.status(500).body(null);
       }
+   }
+
+   private String extractKeyFromUrl(String url) {
+      int index = url.lastIndexOf("/");
+      if(index < 0){
+         throw new IllegalArgumentException("Invalid URL");
+      }
+      return url.substring(index + 1);
    }
 }
