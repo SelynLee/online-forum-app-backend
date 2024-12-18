@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.beaconfire</groupId>
+    <artifactId>online-forum-app-backend</artifactId>
+    <version>1.0.0</version>
+    <packaging>pom</packaging>
+
+    <!-- Spring Boot Parent Dependency -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.4.0</version>
+    </parent>
+
+    <modules>
+        <module>api-gateway</module>
+        <module>auth-service</module>
+        <module>file-service</module>
+        <module>history-service</module>
+        <module>posts-service</module>
+        <module>users-service</module>
+        <module>messages-service</module>
+        <module>email-service</module>
+        <module>eureka-server</module>
+    </modules>
+
+    <properties>
+        <java.version>17</java.version>
+    </properties>
+</project>
