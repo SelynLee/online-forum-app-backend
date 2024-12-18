@@ -26,15 +26,10 @@ services:
             context: ./users-service
         ports:
             - "8081:8081"
-        # depends_on:
-        #     - mysql-users
-        #     - eureka-server
-        # environment:
-        #     - DB_HOST=mysql-users
-        #     - DB_PORT=3306
-        #     - DB_USER=root
-        #     - DB_PASSWORD=root
-        #     - EUREKA_SERVER_URI=http://eureka-server:8761/eureka
+        depends_on:
+            - eureka-server
+        environment:
+            - EUREKA_SERVER_URI=http://eureka-server:8761/eureka
         networks:
             - app-network
 
@@ -43,11 +38,11 @@ services:
             context: ./posts-service
         ports:
             - "8082:8082"
-        # depends_on:
-        #     - mongo
+        depends_on:
+            - mongo
         #     - eureka-server
-        # environment:
-        #     - MONGO_URI=mongodb://mongo:27017/posts
+        environment:
+            - MONGO_URI=mongodb://mongo:27017/posts
         #     - EUREKA_SERVER_URI=http://eureka-server:8761/eureka
         networks:
             - app-network
@@ -129,17 +124,15 @@ services:
         #     - EMAIL_PASSWORD=myemailpassword
         networks:
             - app-network
-    # mysql-users:
-    #     image: mysql:8.0
-    #     container_name: mysql-users
-    #     environment:
-    #         MYSQL_ROOT_PASSWORD: root
-    #         MYSQL_DATABASE: users_db
-    #     ports:
-    #         - "3306:3306"
-    #     networks:
-    #         - app-network
-
+    mysql-users:
+        image: mysql:8.0
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+            MYSQL_DATABASE: users_db
+        ports:
+            - "3307:3306"
+        networks:
+            - app-network
     # mysql-history:
     #     image: mysql:8.0
     #     container_name: mysql-history
@@ -162,13 +155,13 @@ services:
     #     networks:
     #         - app-network
 
-    # mongo:
-    #     image: mongo
-    #     container_name: mongo
-    #     ports:
-    #         - "27017:27017"
-    #     networks:
-    #         - app-network
+    mongo:
+        image: mongo
+        container_name: mongo
+        ports:
+            - "27017:27017"
+        networks:
+            - app-network
 
 networks:
     app-network:
