@@ -14,10 +14,10 @@ services:
             context: ./api-gateway
         ports:
             - "8080:8080"
-        # depends_on:
-        #     - eureka-server
-        # environment:
-        #     - EUREKA_SERVER_URI=http://eureka-server:8761/eureka
+        depends_on:
+            - eureka-server
+        environment:
+            - EUREKA_SERVER_URI=http://eureka-server:8761/eureka
         networks:
             - app-network
 
