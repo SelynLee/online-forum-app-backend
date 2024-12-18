@@ -1,0 +1,22 @@
+# The bootstrap.yml (or bootstrap.properties) file in a Spring Boot application
+# is used for early initialization during the application startup process.
+# It is loaded before the main application.yml or application.properties.
+spring:
+  application:
+    name: history-service
+  profiles:
+    active: production # config-client-production.property(or yml)
+# This profile needs to match the server's profile
+  cloud:
+    config:
+      name: history-service # need to match the first config file in GitHub, By default use the application name
+      uri: http://localhost:8888 # point to config server location
+      label: main # branch
+# Getting cloud config from the server on port 8888
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*" # Exposes all actuator's endpoints, includes /refresh
+
