@@ -12,10 +12,10 @@ public class EmailMessageSender {
     private static final String RABBITMQ_USERNAME = "groupproject";
     private static final String RABBITMQ_PASSWORD = "groupproject";
 
-    public void sendEmailMessage(String email, String username) {
+    public void sendEmailMessage(String email, String firstName, String lastName, String url) {
 
         int token = (int) (Math.random() * 900000) + 100000;
-        String message = String.format("{\"email\": \"%s\", \"username\": \"%s\", \"token\": \"%06d\"}", email, username, token);
+        String message = String.format("{\"email\": \"%s\", \"firstName\": \"%s\", \"lastName\": \"%s\",\"url\": \"%s\"}", email, firstName, lastName,url );
 
 
         try {
@@ -44,6 +44,6 @@ public class EmailMessageSender {
 
     public static void main(String[] args) {
         EmailMessageSender sender = new EmailMessageSender();
-        sender.sendEmailMessage("dongyuxiaoned@gmail.com", "TestUser");
+        sender.sendEmailMessage("dongyuxiaoned@gmail.com", "Gary", "Lin", "http://localhost:8080/auth/validate?token=O3FyKs-ezxjJbqdtFHx_y-jOTQmR6ISuDeQVpp_M8b0");
     }
 }

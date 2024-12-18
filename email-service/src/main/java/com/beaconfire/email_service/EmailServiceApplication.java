@@ -1,5 +1,7 @@
 package com.beaconfire.email_service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.boot.SpringApplication;
@@ -44,13 +46,16 @@ public class EmailServiceApplication {
 		try {
 			System.out.println(" [x] Received '" + message + "'");
 
+			// 使用 Jackson ObjectMapper 解析 JSON 字符串
+			ObjectMapper objectMapper = new ObjectMapper();
+			JsonNode jsonNode = objectMapper.readTree(message);
 
-			String email = message.split("\"email\": \"")[1].split("\"")[0];
-			String username = message.split("\"username\": \"")[1].split("\"")[0];
-			String token = message.split("\"token\": \"")[1].split("\"")[0];
+			String email = jsonNode.get("email").asText();
+			String firstname = jsonNode.get("firstName").asText();
+			String lastname = jsonNode.get("lastName").asText();
+			String url = jsonNode.get("url").asText();
 
-
-			sendEmail(email, username, token);
+			sendEmail(email, firstname, lastname, url);
 
 		} catch (Exception e) {
 			System.err.println("Error handling message: " + e.getMessage());
@@ -58,33 +63,72 @@ public class EmailServiceApplication {
 	}
 
 
-	private void sendEmail(String recipientEmail, String username, String token) throws MessagingException {
+//	private void sendEmail(String recipientEmail, String firstname, String lastname, String url) throws MessagingException {
+//
+//		Properties properties = new Properties();
+//		properties.put("mail.smtp.auth", "true");
+//		properties.put("mail.smtp.starttls.enable", "true");
+//		properties.put("mail.smtp.host", SMTP_HOST);
+//		properties.put("mail.smtp.port", "587");
+//
+//
+//		Session session = Session.getInstance(properties, new Authenticator() {
+//			@Override
+//			protected PasswordAuthentication getPasswordAuthentication() {
+//				return new PasswordAuthentication(SMTP_EMAIL, SMTP_PASSWORD);
+//			}
+//		});
+//
+//
+//		Message message = new MimeMessage(session);
+//		message.setFrom(new InternetAddress(From_EMAIL_ADDRESS));
+//		message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
+//		message.setSubject("Welcome to Our Service");
+//		message.setText("Dear " + firstname+ " "+lastname + ",\n\nThank you for registering with us!, your token is: \n" + url);
+//		message.setText("Dear " + firstname + " " + lastname + ",\n\n"
+//						+ "Thank you for registering with us! Your token is:\n"
+//						+ "<a href='" + url + "'>" + url + "</a>",
+//				"UTF-8", "html");
+//
+//
+//
+//		Transport.send(message);
+//		System.out.println("Email sent successfully to: " + recipientEmail);
+//	}
+	private void sendEmail(String recipientEmail, String firstname, String lastname, String url) throws MessagingException {
 
-		Properties properties = new Properties();
-		properties.put("mail.smtp.auth", "true");
-		properties.put("mail.smtp.starttls.enable", "true");
-		properties.put("mail.smtp.host", SMTP_HOST);
-		properties.put("mail.smtp.port", "587");
+	Properties properties = new Properties();
+	properties.put("mail.smtp.auth", "true");
+	properties.put("mail.smtp.starttls.enable", "true");
+	properties.put("mail.smtp.host", SMTP_HOST);
+	properties.put("mail.smtp.port", "587");
 
+	Session session = Session.getInstance(properties, new Authenticator() {
+		@Override
+		protected PasswordAuthentication getPasswordAuthentication() {
+			return new PasswordAuthentication(SMTP_EMAIL, SMTP_PASSWORD);
+		}
+	});
 
-		Session session = Session.getInstance(properties, new Authenticator() {
-			@Override
-			protected PasswordAuthentication getPasswordAuthentication() {
-				return new PasswordAuthentication(SMTP_EMAIL, SMTP_PASSWORD);
-			}
-		});
+	Message message = new MimeMessage(session);
+	message.setFrom(new InternetAddress(From_EMAIL_ADDRESS));
+	message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
+	message.setSubject("Welcome to Our Service");
 
+	String htmlContent = "<html>" +
+			"<body>" +
+			"<p>Dear " + firstname + " " + lastname + ",</p>" +
+			"<p>Thank you for registering with us! Your token is:</p>" +
+			"<p><a href='" + url + "'>" + url + "</a></p>" +
+			"</body>" +
+			"</html>";
 
-		Message message = new MimeMessage(session);
-		message.setFrom(new InternetAddress(From_EMAIL_ADDRESS));
-		message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(recipientEmail));
-		message.setSubject("Welcome to Our Service");
-		message.setText("Dear " + username + ",\n\nThank you for registering with us!, your token is: \n\n\n" + token);
+	message.setContent(htmlContent, "text/html; charset=UTF-8");
 
+	Transport.send(message);
+	System.out.println("Email sent successfully to: " + recipientEmail);
+}
 
-		Transport.send(message);
-		System.out.println("Email sent successfully to: " + recipientEmail);
-	}
 
 
 
