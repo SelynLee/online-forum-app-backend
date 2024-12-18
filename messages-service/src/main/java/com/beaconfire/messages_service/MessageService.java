@@ -38,7 +38,7 @@ public class MessageService {
         Message message = messageRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Message not found"));
         message.setStatus(status);
-        
+
         Message updatedMessage = messageRepository.save(message);
 
         return mapToResponseDTO(updatedMessage);
