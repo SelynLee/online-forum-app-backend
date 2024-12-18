@@ -8,19 +8,19 @@ import com.rabbitmq.client.ConnectionFactory;
 @Configuration
 public class RabbitMQConfig {
 
-    @Value("${rabbitmq.host}")
+    @Value("${rabbitmq.connection.host}")
     private String host;
 
-    @Value("${rabbitmq.port}")
+    @Value("${rabbitmq.connection.port}")
     private int port;
 
-    @Value("${rabbitmq.username}")
+    @Value("${rabbitmq.connection.username}")
     private String username;
 
-    @Value("${rabbitmq.password}")
+    @Value("${rabbitmq.connection.password}")
     private String password;
 
-    @Value("${rabbitmq.ssl.enabled}")
+    @Value("${rabbitmq.connection.ssl.enabled}")
     private boolean sslEnabled;
 
     @Bean
