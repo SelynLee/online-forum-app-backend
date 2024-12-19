@@ -23,7 +23,7 @@ public class AuthConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorizeHttpRequests ->
                         authorizeHttpRequests
-                                .requestMatchers("/auth/register", "/auth/validate").permitAll()
+                                .requestMatchers("/auth/**").permitAll()
                 )
                 .build();
     }

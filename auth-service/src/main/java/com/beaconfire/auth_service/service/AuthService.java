@@ -1,13 +1,9 @@
 package com.beaconfire.auth_service.service;
 
-import com.beaconfire.auth_service.dto.EmailRequest;
-import com.beaconfire.auth_service.dto.RegisterRequest;
-import com.beaconfire.auth_service.entity.Token;
-import com.beaconfire.auth_service.entity.User;
-import com.beaconfire.auth_service.entity.UserType;
-import com.beaconfire.auth_service.exception.UserAlreadyExistsException;
-import com.beaconfire.auth_service.exception.InvalidTokenException;
-import com.beaconfire.auth_service.repository.UserRepository;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -15,8 +11,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
+import com.beaconfire.auth_service.JwtUtil.JwtUtil;
+import com.beaconfire.auth_service.dto.EmailRequest;
+import com.beaconfire.auth_service.dto.RegisterRequest;
+import com.beaconfire.auth_service.entity.Token;
+import com.beaconfire.auth_service.entity.User;
+import com.beaconfire.auth_service.entity.UserType;
+import com.beaconfire.auth_service.exception.InvalidTokenException;
+import com.beaconfire.auth_service.exception.UserAlreadyExistsException;
+import com.beaconfire.auth_service.repository.UserRepository;
 
 @Service
 public class AuthService {
@@ -25,16 +28,18 @@ public class AuthService {
     private final RabbitMQProducer rabbitMQProducer;
     private final PasswordEncoder passwordEncoder;
     private final EmailTokenService emailTokenService;
+    private final JwtUtil jwtUtil;
 
     @Value("${verification.email.url}")
     private String verificationUrl;
 
     @Autowired
-    public AuthService(UserRepository userRepository, RabbitMQProducer rabbitMQProducer, PasswordEncoder passwordEncoder, EmailTokenService emailTokenService) {
+    public AuthService(UserRepository userRepository, RabbitMQProducer rabbitMQProducer, PasswordEncoder passwordEncoder, EmailTokenService emailTokenService, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.rabbitMQProducer = rabbitMQProducer;
         this.passwordEncoder = passwordEncoder;
         this.emailTokenService = emailTokenService;
+        this.jwtUtil=jwtUtil;
     }
 
     public ResponseEntity<String> addNewUser(RegisterRequest registerRequest) {
@@ -80,7 +85,7 @@ public class AuthService {
 
         if (existingUser.isPresent()) {
             newUser.setUserId(existingUser.get().getUserId());
-            newUser.setDateJoined(LocalDateTime.now());
+            newUser.setCreatedAt(LocalDateTime.now());
         }
 
         return newUser;
@@ -92,7 +97,7 @@ public class AuthService {
                 passwordEncoder.encode(registerRequest.getPassword()),
                 registerRequest.getFirstName(),
                 registerRequest.getLastName(),
-                UserType.Visitor,
+                UserType.VISITOR,
                 false
         );
     }
@@ -107,6 +112,7 @@ public class AuthService {
         }
 
         activateUser(user);
+        
         return ResponseEntity.status(HttpStatus.OK).body("User activated successfully.");
     }
 
@@ -117,7 +123,26 @@ public class AuthService {
 
     private void activateUser(User user) {
         user.setActive(true);
-        user.setUserType(UserType.Normal);
+        user.setUserType(UserType.NORMAL);
         userRepository.save(user);
     }
+    
+    
+ // Temporary method to generate a JWT token
+    public ResponseEntity<String> generateTemporaryToken(String email) {
+    	System.out.print(email);
+        // Retrieve user from repository
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new InvalidTokenException("User does not exist."));
+
+        // Generate the JWT token
+        String token = jwtUtil.generateToken(
+                user.getEmail(),
+                user.getUserType().name() // Convert enum to string representation
+        );
+
+        // Return the generated token in response
+        return ResponseEntity.ok("Generated Token: " + token);
+    }
+
 }

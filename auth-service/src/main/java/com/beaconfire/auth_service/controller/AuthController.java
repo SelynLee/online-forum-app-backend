@@ -27,4 +27,11 @@ public class AuthController {
     public ResponseEntity<String> activateUserByToken(@RequestParam("token") String token) {
         return authService.activateUserByToken(token);
     }
+    
+    //delete later 
+    @GetMapping("/generate-token")
+    public ResponseEntity<String> generateTemporaryToken(@RequestParam(defaultValue = "admin@admin.com") String email) {
+        return authService.generateTemporaryToken(email);
+    }
+
 }
