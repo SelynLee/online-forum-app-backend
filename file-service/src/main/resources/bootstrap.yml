@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: file-service
+  profiles:
+    active: production # config-client-production.property(or yml)
+  # This profile needs to match the server's profile
+  cloud:
+    config:
+      name: file-service # need to match the first config file in GitHub, By default use the application name
+      uri: https://cloudconfig.nico-nico-nii.com/ # point to config server location
+      label: main # branch
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

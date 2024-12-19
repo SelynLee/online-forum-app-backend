@@ -1,15 +1,16 @@
-server:
-  port: 8086
-
-spring:
-  application:
-    name: file-service
-
-eureka:
-  client:
-    service-url:
+#server:
+#  port: 8086
+#
+#spring:
+#  application:
+#    name: file-service
+#
+## Eureka Configuration
+#eureka:
+#  client:
+#    service-url:
 #      defaultZone: http://localhost:8761/eureka/
-      defaultZone: http://host.docker.internal:8761/eureka
-      prefer-ip-address: true
-    registerWithEureka: true
-    fetchRegistry: true
+##      defaultZone: http://host.docker.internal:8761/eureka
+##      prefer-ip-address: true
+#    registerWithEureka: true
+#    fetchRegistry: true
