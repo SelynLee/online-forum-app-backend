@@ -28,6 +28,9 @@ public class User {
 
     @Column(name = "active", nullable = false)
     private boolean active= false;
+    
+    @Column(name = "date_joined", nullable = false, columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
+    private LocalDateTime dateJoined;
 
 
     @Enumerated(EnumType.STRING)
@@ -114,10 +117,16 @@ public class User {
     public void setActive(boolean active) {
         this.active = active;
     }
+    
+    public LocalDateTime getDateJoined() {
+		return dateJoined;
+	}
 
+	public void setDateJoined(LocalDateTime dateJoined) {
+		this.dateJoined = dateJoined;
+	}
 
-
-    public UserType getUserType() {
+	public UserType getUserType() {
         return userType;
     }
 
