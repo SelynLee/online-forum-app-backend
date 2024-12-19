@@ -50,3 +50,4 @@ jwt:
   issuer: auth_service
   ttl:
     millis: 1800000
+  secret: d1M0MTVCMjFaUnRoZE9iZWlVY0VXMlVNWnBTSEhDNFNWQVpiLTlNdkJHdy1qRnRYUncydjFnRnY0M20yUXF4NXd6WFk2MDBHODhaYjZBd05Yc21zVlE=

@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.spec.SecretKeySpec;
 import java.security.Key;
-import java.security.SecureRandom;
 import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
@@ -21,6 +20,9 @@ public class JwtService {
 
     @Value("${jwt.ttl.millis}")
     private long ttlMillis;
+
+    @Value("${jwt.secret}")
+    private String secret;
 
     private static final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS256;
 
@@ -43,7 +45,7 @@ public class JwtService {
     }
 
     private Key getSigningKey() {
-        byte[] apiKeySecretBytes = Base64.getDecoder().decode(createJwtSecretKey());
+        byte[] apiKeySecretBytes = Base64.getDecoder().decode(secret);
         return new SecretKeySpec(apiKeySecretBytes, SIGNATURE_ALGORITHM.getJcaName());
     }
 
@@ -64,13 +66,5 @@ public class JwtService {
     private Date getExpirationDate() {
         long expirationMillis = System.currentTimeMillis() + ttlMillis;
         return new Date(expirationMillis);
-    }
-
-    private String createJwtSecretKey() {
-        byte[] keyBytes = new byte[32];
-        SecureRandom secureRandom = new SecureRandom();
-        secureRandom.nextBytes(keyBytes);
-
-        return Base64.getEncoder().encodeToString(keyBytes);
     }
 }
