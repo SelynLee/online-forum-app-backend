@@ -1,8 +1,6 @@
 package com.beaconfire.auth_service.service;
 
-import com.beaconfire.auth_service.dto.AuthRequest;
-import com.beaconfire.auth_service.dto.EmailRequest;
-import com.beaconfire.auth_service.dto.RegisterRequest;
+import com.beaconfire.auth_service.dto.*;
 import com.beaconfire.auth_service.entity.Token;
 import com.beaconfire.auth_service.entity.User;
 import com.beaconfire.auth_service.entity.UserType;
@@ -126,7 +124,7 @@ public class AuthService {
                 .orElseThrow(() -> new InvalidTokenException("User associated with this token does not exist."));
     }
 
-    public ResponseEntity<String> authenticateUserAndGenerateJwt(AuthRequest authRequest) {
+    public ResponseEntity<ApiResponse<AuthData>> authenticateUserAndGenerateJwt(AuthRequest authRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authRequest.getEmail(), authRequest.getPassword())
         );
@@ -141,6 +139,8 @@ public class AuthService {
         }
 
         String jwt = jwtService.createJwt(user);
-        return ResponseEntity.status(HttpStatus.OK).body(jwt);
+        AuthData authData = new AuthData(user.getUserId(), jwt);
+        ApiResponse<AuthData> response = new ApiResponse<>("success", "Login successful", authData);
+        return ResponseEntity.ok(response);
     }
 }
