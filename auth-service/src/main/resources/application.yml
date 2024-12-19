@@ -7,9 +7,9 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/online_forum_app
+    url: jdbc:mysql://database-1.cjwa24k2srfd.us-east-2.rds.amazonaws.com:3306/users_db
     username: root
-    password: Root-123
+    password: groupproject
 
   jpa:
     hibernate:
