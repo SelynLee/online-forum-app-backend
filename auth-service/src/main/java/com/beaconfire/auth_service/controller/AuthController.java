@@ -8,9 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.Map;
-
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -23,10 +20,8 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<Map<String, String>> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
-        ResponseEntity<String> result = authService.addNewUser(registerRequest);
-        Map<String, String> response = Collections.singletonMap("message", result.getBody());
-        return ResponseEntity.status(result.getStatusCode()).body(response);
+    public ResponseEntity<String> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
+        return authService.addNewUser(registerRequest);
     }
 
     @PatchMapping("/validate")
