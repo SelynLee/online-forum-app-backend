@@ -203,17 +203,16 @@ public class PostController {
 
     @Operation(summary = "Get posts by user ID", description = "Retrieves all posts created by a specific user.")
     @GetMapping("/user/{userId}")
-    public ResponseEntity<DataResponse> getPostsWithUserByUserId(
+    public DataResponse getPostsWithUserByUserId(
             @PathVariable Integer userId) {
         List<PostWithUserDTO> postsWithUser = postService.getPostsByUserId(userId);
 
-        return ResponseEntity.ok(
-                DataResponse.builder()
-                        .success(true)
-                        .message("Posts fetched successfully for user ID: " + userId)
-                        .data(postsWithUser)
-                        .build()
-        );
+        return  DataResponse.builder()
+                     .success(true)
+                     .message("Posts fetched successfully for user ID: " + userId)
+                     .data(postsWithUser)
+                     .build();
+     
     }
     
     @Operation(summary = "Get posts by accessibility", description = "Retrieves posts filtered by accessibility status.")
@@ -581,6 +580,7 @@ public class PostController {
                             .build());
         }
     }
+    
     @Operation(
             summary = "Increment Post Views",
             description = "Increments the view count for a post whenever it is accessed."

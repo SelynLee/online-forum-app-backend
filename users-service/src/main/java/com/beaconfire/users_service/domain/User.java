@@ -27,7 +27,7 @@ import lombok.ToString;
 
 
 @Entity
-@Table(name = "user")
+@Table(name = "users")
 @Getter
 @Setter
 @ToString
@@ -53,6 +53,9 @@ public class User {
     @NotBlank(message = "Email is required")
     @Email(message = "Email should be valid")
     private String email;
+    
+    @Column(name = "password", nullable = false, length = 255)
+    private String password;
 
 
     @Column(nullable = false)
@@ -68,6 +71,9 @@ public class User {
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+    
+    @Column(name = "date_joined", nullable = false, columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
+    private LocalDateTime dateJoined;
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
