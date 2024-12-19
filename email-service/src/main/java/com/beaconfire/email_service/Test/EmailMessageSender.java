@@ -1,4 +1,4 @@
-package com.beaconfire.email_service;
+package com.beaconfire.email_service.Test;
 
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.Channel;
@@ -44,6 +44,6 @@ public class EmailMessageSender {
 
     public static void main(String[] args) {
         EmailMessageSender sender = new EmailMessageSender();
-        sender.sendEmailMessage("dongyuxiaoned@gmail.com", "Gary", "Lin", "http://localhost:8080/auth/validate?token=O3FyKs-ezxjJbqdtFHx_y-jOTQmR6ISuDeQVpp_M8b0");
+        sender.sendEmailMessage("dongyuxiaoned@gmail.com", "Edward", "D", "http://localhost:8080/auth/validate?token=O3FyKs-ezxjJbqdtFHx_y-jOTQmR6ISuDeQVpp_M8b0");
     }
 }

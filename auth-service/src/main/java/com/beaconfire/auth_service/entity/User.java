@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
+//change the name to user later
 @Table(name = "users")
 public class User {
 
@@ -26,10 +27,11 @@ public class User {
     private String password;
 
     @Column(name = "active", nullable = false)
-    private boolean active;
-
+    private boolean active= false;
+    
     @Column(name = "date_joined", nullable = false, columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
     private LocalDateTime dateJoined;
+
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
@@ -60,7 +62,6 @@ public class User {
     protected void onCreate() {
         LocalDateTime now = LocalDateTime.now();
         this.createdAt = now;
-        this.dateJoined = now;
         this.updatedAt = now;
     }
 
@@ -116,16 +117,16 @@ public class User {
     public void setActive(boolean active) {
         this.active = active;
     }
-
+    
     public LocalDateTime getDateJoined() {
-        return dateJoined;
-    }
+		return dateJoined;
+	}
 
-    public void setDateJoined(LocalDateTime dateJoined) {
-        this.dateJoined = dateJoined;
-    }
+	public void setDateJoined(LocalDateTime dateJoined) {
+		this.dateJoined = dateJoined;
+	}
 
-    public UserType getUserType() {
+	public UserType getUserType() {
         return userType;
     }
 
@@ -165,7 +166,6 @@ public class User {
                 ", lastName='" + lastName + '\'' +
                 ", email='" + email + '\'' +
                 ", active=" + active +
-                ", dateJoined=" + dateJoined +
                 ", userType=" + userType +
                 ", createdAt=" + createdAt +
                 ", updatedAt=" + updatedAt +
