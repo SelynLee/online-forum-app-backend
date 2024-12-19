@@ -10,7 +10,7 @@ spring:
   cloud:
     config:
       name: history-service # need to match the first config file in GitHub, By default use the application name
-      uri: http://localhost:8888 # point to config server location
+      uri: https://cloudconfig.nico-nico-nii.com/ # point to config server location
       label: main # branch
 # Getting cloud config from the server on port 8888
 

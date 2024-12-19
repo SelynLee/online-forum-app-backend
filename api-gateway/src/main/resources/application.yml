@@ -13,7 +13,17 @@ spring:
           predicates:
             - Path=/auth/**
 
+        - id: posts-service
+          uri: lb://POSTS-SERVICE
+          predicates:
+            - Path=/posts/**
+          filters:
+            - AuthenticationFilter
+
 eureka:
   client:
     service-url:
       defaultZone: http://localhost:8761/eureka/
+
+jwt:
+  secret: d1M0MTVCMjFaUnRoZE9iZWlVY0VXMlVNWnBTSEhDNFNWQVpiLTlNdkJHdy1qRnRYUncydjFnRnY0M20yUXF4NXd6WFk2MDBHODhaYjZBd05Yc21zVlE=

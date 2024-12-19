@@ -1,5 +1,6 @@
 package com.beaconfire.auth_service.controller;
 
+import com.beaconfire.auth_service.dto.AuthRequest;
 import com.beaconfire.auth_service.dto.RegisterRequest;
 import com.beaconfire.auth_service.service.AuthService;
 import jakarta.validation.Valid;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
+@CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
 
     private final AuthService authService;
@@ -19,12 +21,17 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> addNewUser(@Valid @RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<String> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         return authService.addNewUser(registerRequest);
     }
 
     @PatchMapping("/validate")
     public ResponseEntity<String> activateUserByToken(@RequestParam("token") String token) {
         return authService.activateUserByToken(token);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> loginUser(@RequestBody @Valid AuthRequest authRequest) {
+        return authService.authenticateUserAndGenerateJwt(authRequest);
     }
 }
