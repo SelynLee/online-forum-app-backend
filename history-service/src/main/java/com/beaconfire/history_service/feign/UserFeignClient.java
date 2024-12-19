@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.beaconfire.history_service.dto.DataResponse;
 
-@FeignClient(name = "users-service", path = "/users")
+@FeignClient(name = "USERS-SERVICE", path = "/users")
 public interface UserFeignClient {
     @GetMapping("/{id}")
     DataResponse getUserById(@PathVariable("id") Integer userId);
