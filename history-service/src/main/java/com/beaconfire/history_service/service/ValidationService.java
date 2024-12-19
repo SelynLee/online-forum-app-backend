@@ -27,7 +27,7 @@ public class ValidationService {
         } catch (Exception e) {
             throw new ValidationException("Failed to validate user: " + e.getMessage());
         }
-        /*
+
         try {
             DataResponse postResponse = postFeignClient.getPostById(postId);
             if (!postResponse.isSuccess()) {
@@ -37,6 +37,6 @@ public class ValidationService {
         } catch (Exception e) {
             throw new ValidationException("Failed to validate post: " + e.getMessage());
         }
-         */
+
     }
 }
