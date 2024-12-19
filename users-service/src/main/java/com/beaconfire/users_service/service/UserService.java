@@ -1,6 +1,7 @@
 package com.beaconfire.users_service.service;
 
-import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -134,6 +135,14 @@ public class UserService {
 
         // Convert to DTO and return
         return UserDTO.fromUser(updatedUser);
+    }
+    
+    public List<UserDTO> getAllUsers() {
+        // Fetch all users from the repository
+        List<User> users = userRepo.findAll();
+        return users.stream()
+                    .map(UserDTO::fromUser) // Convert each User to UserDTO
+                    .collect(Collectors.toList());
     }
 
 

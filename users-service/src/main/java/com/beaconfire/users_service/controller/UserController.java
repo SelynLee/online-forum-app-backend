@@ -1,5 +1,7 @@
 package com.beaconfire.users_service.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -223,5 +225,40 @@ public class UserController {
     	        );
     	    }
     	}
+    
+    @Operation(
+    	    summary = "Get All Users",
+    	    description = "Fetch all users from the system as a list of user details."
+    	)
+    	@ApiResponses({
+    	    @ApiResponse(responseCode = "200", description = "Users fetched successfully"),
+    	    @ApiResponse(responseCode = "500", description = "Internal server error")
+    	})
+    	@GetMapping
+    	public ResponseEntity<DataResponse> getAllUsers() {
+    	    try {
+    	        // Call the service to fetch all users
+    	        List<UserDTO> users = userService.getAllUsers();
+
+    	        // Return success response
+    	        return ResponseEntity.ok(
+    	                DataResponse.builder()
+    	                        .success(true)
+    	                        .message("Users fetched successfully.")
+    	                        .data(users)
+    	                        .build()
+    	        );
+    	    } catch (Exception e) {
+    	        // Handle unexpected errors
+    	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+    	                DataResponse.builder()
+    	                        .success(false)
+    	                        .message("An unexpected error occurred.")
+    	                        .data(null)
+    	                        .build()
+    	        );
+    	    }
+    	}
+
 
 }
