@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.beaconfire.history_service.dto.DataResponse;
 
-@FeignClient(name = "posts-service", path = "/posts")
+@FeignClient(name = "POSTS-SERVICE", path = "/posts")
 public interface PostFeignClient {
     @GetMapping("/{postId}")
     DataResponse getPostById(@PathVariable("postId") String postId);

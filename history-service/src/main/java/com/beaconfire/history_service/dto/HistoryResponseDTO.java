@@ -17,4 +17,8 @@ public class HistoryResponseDTO {
     private LocalDateTime viewDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    private String postTitle;
+    private String authorName;
+    private Integer authorId;
 }

@@ -1,5 +1,6 @@
 package com.beaconfire.auth_service.exception;
 
+import com.beaconfire.auth_service.dto.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -29,29 +30,31 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, String>> handleRuntimeExceptions(RuntimeException ex) {
+    public ResponseEntity<ApiResponse<Void>> handleRuntimeExceptions(RuntimeException ex) {
         HttpStatus status = EXCEPTION_STATUS_MAP.getOrDefault(ex.getClass(), HttpStatus.INTERNAL_SERVER_ERROR);
         return buildErrorResponse(ex.getMessage(), status);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
         });
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
+
+        ApiResponse<Map<String, String>> response = new ApiResponse<>("error", "Validation failed", errors);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleGeneralExceptions(Exception ex) {
+    public ResponseEntity<ApiResponse<Void>> handleGeneralExceptions(Exception ex) {
         return buildErrorResponse(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    private ResponseEntity<Map<String, String>> buildErrorResponse(String message, HttpStatus status) {
-        Map<String, String> errors = Collections.singletonMap("error", message);
-        return ResponseEntity.status(status).body(errors);
+    private ResponseEntity<ApiResponse<Void>> buildErrorResponse(String message, HttpStatus status) {
+        ApiResponse<Void> response = new ApiResponse<>("error", message, null);
+        return ResponseEntity.status(status).body(response);
     }
 }

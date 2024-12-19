@@ -49,6 +49,18 @@ class HistoryControllerTest {
 
     @Test
     void getUserHistory_ShouldReturnHistoryList() {
+        HistoryResponseDTO testResponseDTO = HistoryResponseDTO.builder()
+                .historyId(1)
+                .userId(1)
+                .postId("post123")
+                .viewDate(LocalDateTime.now())
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .postTitle("Test Post")
+                .authorId(2)
+                .authorName("John Doe")
+                .build();
+
         when(historyService.getUserHistory(1))
                 .thenReturn(Arrays.asList(testResponseDTO));
 

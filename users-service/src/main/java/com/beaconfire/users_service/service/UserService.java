@@ -144,7 +144,11 @@ public class UserService {
                     .map(UserDTO::fromUser) // Convert each User to UserDTO
                     .collect(Collectors.toList());
     }
-
+    public UserDTO findUserByEmail(String email) {
+        User user = userRepo.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+        return UserDTO.fromUser(user);
+    }
 
     
 
