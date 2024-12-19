@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-//change the name to user later
 @Table(name = "users")
 public class User {
 

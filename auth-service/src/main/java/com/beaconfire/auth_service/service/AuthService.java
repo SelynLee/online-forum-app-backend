@@ -88,8 +88,8 @@ public class AuthService {
 
         if (existingUser.isPresent()) {
             newUser.setUserId(existingUser.get().getUserId());
-            newUser.setDateJoined(LocalDateTime.now());
         }
+        newUser.setDateJoined(LocalDateTime.now());
 
         return newUser;
     }
