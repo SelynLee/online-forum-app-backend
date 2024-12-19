@@ -259,6 +259,59 @@ public class UserController {
     	        );
     	    }
     	}
+    
+    @Operation(
+            summary = "Get User by Email",
+            description = "Retrieve the details of a user by their email address."
+        )
+        @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "User fetched successfully"),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid email input"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+        })
+        @GetMapping("/email")
+        public ResponseEntity<DataResponse> getUserByEmail(
+                @Parameter(description = "Email of the user to be fetched", required = true)
+                @RequestParam("email") String email) {
+            try {
+                UserDTO userDTO = userService.findUserByEmail(email);
+                return ResponseEntity.ok(
+                        DataResponse.builder()
+                                .success(true)
+                                .message("User fetched successfully.")
+                                .data(userDTO)
+                                .build()
+                );
+            } catch (ResourceNotFoundException e) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                        DataResponse.builder()
+                                .success(false)
+                                .message(e.getMessage())
+                                .data(null)
+                                .build()
+                );
+            } catch (IllegalArgumentException e) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
+                        DataResponse.builder()
+                                .success(false)
+                                .message("Invalid email format.")
+                                .data(null)
+                                .build()
+                );
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                        DataResponse.builder()
+                                .success(false)
+                                .message("An unexpected error occurred.")
+                                .data(null)
+                                .build()
+                );
+            }
+        }
+    
+    
+    
 
 
 }
