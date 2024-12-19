@@ -1,5 +1,7 @@
 package com.beaconfire.auth_service.controller;
 
+import com.beaconfire.auth_service.dto.ApiResponse;
+import com.beaconfire.auth_service.dto.AuthData;
 import com.beaconfire.auth_service.dto.AuthRequest;
 import com.beaconfire.auth_service.dto.RegisterRequest;
 import com.beaconfire.auth_service.service.AuthService;
@@ -30,7 +32,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> loginUser(@RequestBody @Valid AuthRequest authRequest) {
+    public ResponseEntity<ApiResponse<AuthData>> loginUser(@RequestBody @Valid AuthRequest authRequest) {
         return authService.authenticateUserAndGenerateJwt(authRequest);
     }
 }
