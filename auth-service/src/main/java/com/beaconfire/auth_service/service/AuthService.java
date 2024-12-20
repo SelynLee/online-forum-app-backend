@@ -46,7 +46,7 @@ public class AuthService {
         this.jwtService = jwtService;
     }
 
-    public ResponseEntity<String> addNewUser(RegisterRequest registerRequest) {
+    public ResponseEntity<ApiResponse<User>> addNewUser(RegisterRequest registerRequest) {
         validateUserExistence(registerRequest.getEmail());
 
         String token = emailTokenService.generateAndSaveToken(registerRequest.getEmail());
@@ -55,7 +55,8 @@ public class AuthService {
         User newUser = buildNewUser(registerRequest);
         userRepository.save(newUser);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully.");
+        ApiResponse<User> response = new ApiResponse<>("success", "User registered successfully.", newUser);
+        return ResponseEntity.ok(response);
     }
 
     private void validateUserExistence(String email) {
@@ -84,9 +85,7 @@ public class AuthService {
         Optional<User> existingUser = userRepository.findByEmail(registerRequest.getEmail());
         User newUser = convertToEntity(registerRequest);
 
-        if (existingUser.isPresent()) {
-            newUser.setUserId(existingUser.get().getUserId());
-        }
+        existingUser.ifPresent(user -> newUser.setUserId(user.getUserId()));
         newUser.setDateJoined(LocalDateTime.now());
 
         return newUser;
@@ -140,7 +139,7 @@ public class AuthService {
 
         String jwt = jwtService.createJwt(user);
         AuthData authData = new AuthData(user.getUserId(), jwt);
-        ApiResponse<AuthData> response = new ApiResponse<>("success", "Login successful", authData);
+        ApiResponse<AuthData> response = new ApiResponse<>("success", "Login successful.", authData);
         return ResponseEntity.ok(response);
     }
 }

@@ -4,6 +4,7 @@ import com.beaconfire.auth_service.dto.ApiResponse;
 import com.beaconfire.auth_service.dto.AuthData;
 import com.beaconfire.auth_service.dto.AuthRequest;
 import com.beaconfire.auth_service.dto.RegisterRequest;
+import com.beaconfire.auth_service.entity.User;
 import com.beaconfire.auth_service.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<ApiResponse<User>> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         return authService.addNewUser(registerRequest);
     }
 
