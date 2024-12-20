@@ -1,4 +1,4 @@
-package com.beaconfire.file_service;
+package com.beaconfire.auth_service.exception;
 
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
@@ -10,22 +10,23 @@ import org.springframework.stereotype.Component;
 
 @Aspect
 @Component
-public class FileServiceExceptionAspect {
-    private static final Logger logger = LoggerFactory.getLogger(FileServiceExceptionAspect.class);
+public class AuthServiceExceptionAspect {
 
-    @Pointcut("within(com.beaconfire.file_service..*)")
-    public void fileServicePointcut() {}
+    private static final Logger logger = LoggerFactory.getLogger(AuthServiceExceptionAspect.class);
 
-    @Around("fileServicePointcut()")
-    public Object handleFileServiceExceptions(ProceedingJoinPoint joinPoint) throws Throwable {
+    @Pointcut("within(com.beaconfire.auth_service..*)")
+    public void authServicePointcut() {}
+
+    @Around("authServicePointcut()")
+    public Object handleAuthServiceExceptions(ProceedingJoinPoint joinPoint) throws Throwable {
         try {
             return joinPoint.proceed();
         } catch (Exception ex) {
-            logger.error("File-Service Exception in {}.{}: {}",
+            logger.error("Auth-Service Exception in {}.{}: {}",
                     joinPoint.getSignature().getDeclaringTypeName(),
                     joinPoint.getSignature().getName(),
                     ex.getMessage(), ex);
-            throw new RuntimeException("An error occurred while processing the file request.");
+            throw new RuntimeException("Authentication or permission error occurred.");
         }
     }
 }
