@@ -1,8 +1,16 @@
 package com.beaconfire.posts_service;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.List;
@@ -17,15 +25,14 @@ import org.mockito.MockitoAnnotations;
 
 import com.beaconfire.posts_service.domain.Metadata;
 import com.beaconfire.posts_service.domain.Post;
-import com.beaconfire.posts_service.domain.feign.UserFeignClient;
 import com.beaconfire.posts_service.dto.DataResponse;
 import com.beaconfire.posts_service.dto.PostWithUserDTO;
 import com.beaconfire.posts_service.dto.UserDTO;
 import com.beaconfire.posts_service.dto.UserPermissionsDTO;
+import com.beaconfire.posts_service.feign.UserFeignClient;
 import com.beaconfire.posts_service.repo.PostRepository;
 import com.beaconfire.posts_service.service.PostService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 class PostServiceTest {
 

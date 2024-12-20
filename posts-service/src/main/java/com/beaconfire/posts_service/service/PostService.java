@@ -17,7 +17,6 @@ import com.beaconfire.posts_service.domain.Metadata;
 import com.beaconfire.posts_service.domain.Post;
 import com.beaconfire.posts_service.domain.PostReply;
 import com.beaconfire.posts_service.domain.SubReply;
-import com.beaconfire.posts_service.domain.feign.UserFeignClient;
 import com.beaconfire.posts_service.dto.DataResponse;
 import com.beaconfire.posts_service.dto.PostWithUserDTO;
 import com.beaconfire.posts_service.dto.UserDTO;
@@ -25,6 +24,7 @@ import com.beaconfire.posts_service.dto.UserPermissionsDTO;
 import com.beaconfire.posts_service.dto.UserType;
 import com.beaconfire.posts_service.exception.PostNotFoundException;
 import com.beaconfire.posts_service.exception.ReplyNotFoundException;
+import com.beaconfire.posts_service.feign.UserFeignClient;
 import com.beaconfire.posts_service.repo.PostRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -53,6 +53,8 @@ public class PostService {
         }
         return null; // Return null if user data is not found or an error occurs
     }
+    
+    @Cacheable(value = "posts", key = "#postId", unless = "#result == null")
     public List<PostWithUserDTO> getPostsByUserId(Integer userId) {
         List<Post> posts = postRepository.findByUserId(userId);
 
@@ -173,8 +175,9 @@ public class PostService {
 
 
 
-//    @CacheEvict(value = "posts", key = "#postId")
-    public Post updatePost(String postId, Post updatedPost) {
+    @CachePut(value = "posts", key = "#postId")
+    @CacheEvict(value = "postsList", allEntries = true)
+    public PostWithUserDTO updatePost(String postId, Post updatedPost) {
         System.out.println("Fetching post with ID: " + postId);
         Post existingPost = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Post not found with ID: " + postId));
@@ -197,11 +200,16 @@ public class PostService {
         Post savedPost = postRepository.save(existingPost);
         System.out.println("Saved Post: " + savedPost);
 
-        return savedPost;
+        // Fetch the associated user and build the DTO
+        UserDTO user = fetchUserById(savedPost.getUserId());
+        return PostWithUserDTO.builder()
+                .post(savedPost)
+                .user(user)
+                .build();
     }
 
 
-//    @CacheEvict(value = "posts", key = "#postId")
+
     public void deletePost(String postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Post not found with ID: " + postId));
@@ -257,8 +265,7 @@ public class PostService {
 
 
 
-
-
+    @Cacheable(value = "postsList")
     public List<PostWithUserDTO> getAllPosts() {
         List<Post> posts = postRepository.findAll();
 
@@ -271,15 +278,8 @@ public class PostService {
         }).collect(Collectors.toList());
     }
 
-//    public List<Post> getPostsByStatus(String status) {
-//        try {
-//            Accessibility.valueOf(status.toUpperCase());
-//        } catch (IllegalArgumentException e) {
-//            throw new InvalidPostStatusException("Invalid post status: " + status);
-//        }
-//        return postRepository.findByStatus(status);
-//    }
-//    @Cacheable(value = "posts", key = "#postId", unless = "#result == null")
+
+    @Cacheable(value = "posts", key = "#postId", unless = "#result == null")
     public PostWithUserDTO getPostById(String postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Post not found with ID: " + postId));
@@ -291,6 +291,7 @@ public class PostService {
                 .user(user)
                 .build();
     }
+
 
     public Post addReplyToPost(String postId, PostReply reply) {
         Post post = postRepository.findById(postId)
@@ -344,13 +345,9 @@ public class PostService {
         return postRepository.save(existingPost);
     }
 
-
-
     public List<Post> getPostsByAccessibility(Accessibility accessibility) {
-       
         return postRepository.findByAccessibility(accessibility);
     }
-
 
 
     public Post updateReply(String postId, String replyId, PostReply updatedReply) {
@@ -371,6 +368,7 @@ public class PostService {
         // Save and return the updated post
         return postRepository.save(existingPost);
     }
+    
     public Post updateSubReply(String postId, String replyId, String subReplyId, SubReply updatedSubReply) {
         // Find the post by ID
         Post existingPost = postRepository.findById(postId)

@@ -23,6 +23,7 @@ import com.beaconfire.posts_service.domain.Post;
 import com.beaconfire.posts_service.dto.AccessibilityRequest;
 import com.beaconfire.posts_service.dto.DataResponse;
 import com.beaconfire.posts_service.dto.PostWithUserDTO;
+import com.beaconfire.posts_service.dto.UserDTO;
 import com.beaconfire.posts_service.service.PostService;
 
 class PostControllerTest {
@@ -74,7 +75,18 @@ class PostControllerTest {
         updatedPost.setUserId(1);
         updatedPost.setAccessibility(Accessibility.PUBLISHED);
 
-        when(postService.updatePost("1", updatedPost)).thenReturn(updatedPost);
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(1);
+        userDTO.setEmail("user@example.com");
+        userDTO.setFirstName("John");
+        userDTO.setLastName("Doe");
+
+        PostWithUserDTO updatedPostWithUserDTO = PostWithUserDTO.builder()
+                .post(updatedPost)
+                .user(userDTO)
+                .build();
+
+        when(postService.updatePost("1", updatedPost)).thenReturn(updatedPostWithUserDTO);
 
         BindingResult bindingResult = Mockito.mock(BindingResult.class);
         when(bindingResult.hasErrors()).thenReturn(false); // Simulate no validation errors
@@ -86,9 +98,10 @@ class PostControllerTest {
         assertNotNull(response);
         assertEquals(true, response.getSuccess());
         assertEquals("Post updated successfully", response.getMessage());
-        assertEquals(updatedPost, response.getData());
+        assertEquals(updatedPostWithUserDTO, response.getData());
         verify(postService, times(1)).updatePost("1", updatedPost);
     }
+
 
     @Test
     void deletePost_Success() {

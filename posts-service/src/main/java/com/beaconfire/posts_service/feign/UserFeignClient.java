@@ -1,4 +1,4 @@
-package com.beaconfire.posts_service.domain.feign;
+package com.beaconfire.posts_service.feign;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;

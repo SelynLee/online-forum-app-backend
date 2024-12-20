@@ -122,7 +122,7 @@ public class PostController {
             validateAccessibility(updatedPost.getAccessibility());
 
             // Update the post
-            Post updatedPostEntity = postService.updatePost(postId, updatedPost);
+            PostWithUserDTO updatedPostEntity = postService.updatePost(postId, updatedPost);
             return DataResponse.builder()
                     .success(true)
                     .message("Post updated successfully")
