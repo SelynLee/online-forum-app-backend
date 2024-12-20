@@ -2,12 +2,14 @@ package com.beaconfire.posts_service.service;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.beaconfire.posts_service.domain.Accessibility;
@@ -171,34 +173,35 @@ public class PostService {
 
 
 
-
+//    @CacheEvict(value = "posts", key = "#postId")
     public Post updatePost(String postId, Post updatedPost) {
-    	
+        System.out.println("Fetching post with ID: " + postId);
         Post existingPost = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Post not found with ID: " + postId));
+
+        System.out.println("Checking permissions for user: " + updatedPost.getUserId());
         UserPermissionsDTO permissions = fetchUserPermissions(updatedPost.getUserId());
+        System.out.println("User Permissions: " + permissions);
 
         if (permissions == null || !permissions.getActive()) {
             throw new IllegalStateException("User must verify their email to update a post.");
         }
-        // Check if the accessibility is being changed
-//        if (!existingPost.getAccessibility().equals(updatedPost.getAccessibility())) {
-//            throw new IllegalArgumentException("You are not allowed to change the accessibility of the post.");
-//        }
-        
-        if (permissions.getType() == UserType.SUPERADMIN || permissions.getType() == UserType.ADMIN) {
-            throw new RuntimeException("Admins are not allowed to modify posts created by users.");
-        }
 
+        System.out.println("Updating fields...");
         existingPost.setTitle(updatedPost.getTitle());
         existingPost.setContent(updatedPost.getContent());
         existingPost.setArchived(updatedPost.isArchived());
         existingPost.setUpdated_at(new Date());
 
-        return postRepository.save(existingPost);
+        System.out.println("Saving updated post...");
+        Post savedPost = postRepository.save(existingPost);
+        System.out.println("Saved Post: " + savedPost);
+
+        return savedPost;
     }
 
 
+//    @CacheEvict(value = "posts", key = "#postId")
     public void deletePost(String postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Post not found with ID: " + postId));
@@ -276,7 +279,7 @@ public class PostService {
 //        }
 //        return postRepository.findByStatus(status);
 //    }
-
+//    @Cacheable(value = "posts", key = "#postId", unless = "#result == null")
     public PostWithUserDTO getPostById(String postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new PostNotFoundException("Post not found with ID: " + postId));
@@ -455,7 +458,11 @@ public class PostService {
 
         return postRepository.save(existingPost);
     }
-
+    
+    @CachePut(value = "posts", key = "#postId")
+    public PostWithUserDTO refreshPostCache(String postId) {
+        return getPostById(postId);
+    }
 
 
 
