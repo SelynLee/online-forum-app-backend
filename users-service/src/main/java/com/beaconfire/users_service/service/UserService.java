@@ -28,13 +28,19 @@ public class UserService {
 
     // Find user by ID
     public UserDTO findUserById(int userId) {
-        User user = userRepo.findById(userId)
-                           .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
+        User user = userRepo.findById(userId).orElse(null);
+        if (user == null) {
+            throw new ResourceNotFoundException("User not found with ID: " + userId);
+        }
         return UserDTO.fromUser(user);
     }
+
+    
     public UserPermissionsDTO getUserPermissions(Integer userId) {
-        User user = userRepo.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
+    	User user = userRepo.findById(userId).orElse(null);
+    	if (user == null) {
+    	    throw new ResourceNotFoundException("User not found with ID: " + userId);
+    	}
 
         // Assign permissions based on the user role
         boolean canCreatePost = false;
@@ -83,11 +89,13 @@ public class UserService {
                 .build();
     }
     
+    
 
     public UserDTO updateUserProfile(int userId, UpdateDto updateDto) {
-        // Fetch the user from the repository
-        User user = userRepo.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
+    	User user = userRepo.findById(userId).orElse(null);
+    	if (user == null) {
+    	    throw new ResourceNotFoundException("User not found with ID: " + userId);
+    	}
 
         // Update only the allowed fields
         if (updateDto.getFirstName() != null) {
@@ -120,8 +128,10 @@ public class UserService {
         }
 
         // Fetch the user to be updated
-        User user = userRepo.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
+        User user = userRepo.findById(userId).orElse(null);
+        if (user == null) {
+            throw new ResourceNotFoundException("User not found with ID: " + userId);
+        }
 
         // Update only 'active' and 'type' fields
         if (userDTO.getActive() != null) {

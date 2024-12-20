@@ -15,18 +15,21 @@ public class GlobalExceptionHandler {
     // Handle custom ResourceNotFoundException
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<DataResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        DataResponse response = DataResponse.builder()
-                .success(false)
-                .message(ex.getMessage())
-                .data(null)
-                .build();
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(DataResponse.builder()
+                        .success(false)
+                        .message(ex.getMessage())
+                        .data(null)
+                        .build());
     }
 
     // Handle validation errors
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<DataResponse> handleValidationException(MethodArgumentNotValidException ex) {
-        String errorMessage = ex.getBindingResult().getFieldError().getDefaultMessage();
+        String errorMessage = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getField() + ": " + error.getDefaultMessage())
+                .findFirst()
+                .orElse("Invalid input data.");
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(DataResponse.builder()
                         .success(false)

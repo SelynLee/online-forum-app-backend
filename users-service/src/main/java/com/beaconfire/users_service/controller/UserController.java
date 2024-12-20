@@ -36,43 +36,58 @@ public class UserController {
 
     // Fetch user by ID
     @Operation(
-        summary = "Get User by ID",
-        description = "Retrieve the details of a user by their unique ID."
-    )
-    @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "User fetched successfully"),
-        @ApiResponse(responseCode = "404", description = "User not found"),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    @GetMapping("/{id}")
-    public ResponseEntity<DataResponse> getUserById(
-            @Parameter(description = "ID of the user to be fetched", required = true) 
-            @PathVariable("id") Integer userId) {
-        try {
-            UserDTO userDTO = userService.findUserById(userId);
-            return ResponseEntity.ok(
-                    DataResponse.builder()
-                            .success(true)
-                            .message("User fetched successfully")
-                            .data(userDTO)
-                            .build()
-            );
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                    DataResponse.builder()
-                            .success(false)
-                            .message(e.getMessage())
-                            .build()
-            );
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    DataResponse.builder()
-                            .success(false)
-                            .message("An unexpected error occurred.")
-                            .build()
-            );
-        }
-    }
+    	    summary = "Get User by ID",
+    	    description = "Retrieve the details of a user by their unique ID."
+    	)
+    	@ApiResponses({
+    	    @ApiResponse(responseCode = "200", description = "User fetched successfully"),
+    	    @ApiResponse(responseCode = "400", description = "Invalid user ID"),
+    	    @ApiResponse(responseCode = "404", description = "User not found"),
+    	    @ApiResponse(responseCode = "500", description = "Internal server error")
+    	})
+    	@GetMapping("/{id}")
+    	public ResponseEntity<DataResponse> getUserById(
+    	        @Parameter(description = "ID of the user to be fetched", required = true) 
+    	        @PathVariable("id") Integer userId) {
+    	    try {
+    	        // Validate user ID
+    	        if (userId == null || userId <= 0) {
+    	            return ResponseEntity.badRequest().body(
+    	                    DataResponse.builder()
+    	                            .success(false)
+    	                            .message("Invalid user ID. ID must be greater than 0.")
+    	                            .data(null)
+    	                            .build()
+    	            );
+    	        }
+
+    	        UserDTO userDTO = userService.findUserById(userId);
+    	        return ResponseEntity.ok(
+    	                DataResponse.builder()
+    	                        .success(true)
+    	                        .message("User fetched successfully")
+    	                        .data(userDTO)
+    	                        .build()
+    	        );
+    	    } catch (ResourceNotFoundException e) {
+    	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+    	                DataResponse.builder()
+    	                        .success(false)
+    	                        .message(e.getMessage())
+    	                        .data(null)
+    	                        .build()
+    	        );
+    	    } catch (Exception e) {
+    	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+    	                DataResponse.builder()
+    	                        .success(false)
+    	                        .message("An unexpected error occurred.")
+    	                        .data(null)
+    	                        .build()
+    	        );
+    	    }
+    	}
+
 
     @Operation(
     	    summary = "Update User Profile",
@@ -95,10 +110,8 @@ public class UserController {
     	        )
     	        @Valid @RequestBody UpdateDto updateDto) {
     	    try {
-    	        // Call the service to update the profile
     	        UserDTO updatedUser = userService.updateUserProfile(userId, updateDto);
 
-    	        // Return success response
     	        return ResponseEntity.ok(
     	                DataResponse.builder()
     	                        .success(true)
@@ -124,6 +137,7 @@ public class UserController {
     	        );
     	    }
     	}
+
 
 
     
@@ -174,51 +188,52 @@ public class UserController {
     	    @ApiResponse(responseCode = "400", description = "Invalid input"),
     	    @ApiResponse(responseCode = "500", description = "Internal server error")
     	})
-    	@PatchMapping("/{id}/status")
-    	public ResponseEntity<DataResponse> updateUserStatus(
-    	        @Parameter(description = "ID of the user to update", required = true)
-    	        @PathVariable("id") Integer userId,
+    
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<DataResponse> updateUserStatus(
+            @PathVariable("id") Integer userId,
+            @RequestBody @Valid UserDTO userDTO,
+            @RequestParam("currentUserId") Integer currentUserId
+    ) {
+        try {
+            UserDTO updatedUser = userService.updateUserStatus(userId, userDTO, currentUserId);
+            return ResponseEntity.ok(
+                    DataResponse.builder()
+                            .success(true)
+                            .message("User status updated successfully.")
+                            .data(updatedUser)
+                            .build()
+            );
+        } catch (ResourceNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    DataResponse.builder()
+                            .success(false)
+                            .message(e.getMessage())
+                            .data(null)
+                            .build()
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
+                    DataResponse.builder()
+                            .success(false)
+                            .message(e.getMessage())
+                            .data(null)
+                            .build()
+            );
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    DataResponse.builder()
+                            .success(false)
+                            .message("An unexpected error occurred.")
+                            .data(null)
+                            .build()
+            );
+        }
+    }
 
-    	        @RequestBody @Valid UserDTO userDTO,
-    	        @RequestParam("currentUserId") Integer currentUserId // For authorization
-    	) {
-    	    try {
-    	        // Call service to update the user status
-    	        UserDTO updatedUser = userService.updateUserStatus(userId, userDTO, currentUserId);
+    
 
-    	        return ResponseEntity.ok(
-    	                DataResponse.builder()
-    	                        .success(true)
-    	                        .message("User status updated successfully.")
-    	                        .data(updatedUser)
-    	                        .build()
-    	        );
-    	    } catch (ResourceNotFoundException e) {
-    	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-    	                DataResponse.builder()
-    	                        .success(false)
-    	                        .message(e.getMessage())
-    	                        .data(null)
-    	                        .build()
-    	        );
-    	    } catch (RuntimeException e) {
-    	        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
-    	                DataResponse.builder()
-    	                        .success(false)
-    	                        .message(e.getMessage())
-    	                        .data(null)
-    	                        .build()
-    	        );
-    	    } catch (Exception e) {
-    	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-    	                DataResponse.builder()
-    	                        .success(false)
-    	                        .message("An unexpected error occurred.")
-    	                        .data(null)
-    	                        .build()
-    	        );
-    	    }
-    	}
+
     
     @Operation(
     	    summary = "Get All Users",
