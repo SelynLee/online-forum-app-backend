@@ -13,7 +13,7 @@ import java.util.List;
 
 @RefreshScope
 @RestController
-@RequestMapping("/api/history")
+@RequestMapping("/history")
 @Slf4j
 public class HistoryController {
     private final HistoryService historyService;
