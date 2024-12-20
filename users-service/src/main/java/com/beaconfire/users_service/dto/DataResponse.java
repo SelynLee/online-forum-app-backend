@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @Builder
 public class DataResponse {
-    private boolean success;
+    private Boolean success;
     private String message;
     private Object data;
 }
